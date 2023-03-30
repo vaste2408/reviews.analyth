@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { YandexMap, YandexMarker } from 'vue-yandex-maps';
-import {ref} from "vue";
+import {YandexMap, YandexObjectManager, loadYmap} from 'vue-yandex-maps';
+import {onMounted, reactive} from "vue";
 
 defineProps({
     canLogin: {
@@ -11,8 +11,86 @@ defineProps({
         type: Boolean,
     },
 });
-const coordinates = ref([55.75, 37.57]);
-const zoom = ref(11);
+
+let map = null;
+let objectManager = [];
+
+const data = reactive({
+    settings: {
+        apiKey: "",
+        lang: "ru_RU", // Используемый язык
+        coordorder: "latlong", // Порядок задания географических координат
+        debug: true, // Режим отладки
+        enterprise: false,
+        center: [55.75, 37.57],
+        version: "2.1", // Версия Я.Карт
+    },
+    events: ['click', 'created', 'boundschange', 'sizechange', 'geo-objects-updated'],
+    bounds: null,
+    center: [55.75, 37.57],
+    zoom: 11,
+    postamats: [],
+    action: ''
+});
+
+function loadPostamats() {
+    fetch(`/api/postamats`).then(r => {
+        r.json().then(val => {
+            data.postamats = val;
+            showFilteredOnMap();
+        });
+    });
+}
+
+function showFilteredOnMap() {
+    let _filtered = [...data.postamats];
+    let _json = {type: "FeatureCollection", features: []};
+    _filtered.forEach(el => {
+        _json.features.push({
+            type: "Feature",
+            id: el.id,
+            geometry: {
+                type: "Point",
+                coordinates: [parseFloat(el.lat), parseFloat(el.lng)],
+            },
+            properties: {
+                balloonContentHeader: el.name,
+                balloonContentBody: `${el.address}`,
+                hintContent: `${el.name}`,
+                clusterCaption: "<strong><s>Еще</s> одна</strong> метка",
+            }
+        });
+    });
+    objectManager.add(_json);
+}
+
+function onMapClick(payload) {
+    console.log(payload);
+}
+
+function onMapCreated(map_obj) {
+    map = map_obj;
+    data.bounds = map.getBounds();
+    let om = new ymaps.ObjectManager({});
+    map.geoObjects.add(om);
+    objectManager = om;
+    loadPostamats();
+}
+
+function onBoundsChanged(event) {
+    data.bounds = event.originalEvent.newBounds;
+    data.center = event.originalEvent.newCenter;
+    data.zoom = event.originalEvent.newZoom;
+    //showFilteredOnMap();
+}
+
+function onGeoUpdated(event) {
+    //alert(data.postamats.length);
+}
+
+onMounted(async () => {
+    await loadYmap(data.settings);
+});
 </script>
 
 <template>
@@ -46,11 +124,24 @@ const zoom = ref(11);
         </div>
         <div class="w-full ">
             <YandexMap
-                :coordinates="coordinates"
-                :zoom="zoom"
+                :coordinates="data.center"
+                :zoom="data.zoom"
+                :settings="data.settings"
+                :region="data.bounds"
+                :events="data.events"
                 style="height: 600px"
+                @click="onMapClick"
+                @created="onMapCreated"
+                @boundschange="onBoundsChanged"
+                @sizechange="onBoundsChanged"
+                @geo-objects-updated="onGeoUpdated"
             >
             </YandexMap>
+            <p>action: {{data.action}}</p>
+            <p>center: {{data.center}}</p>
+            <p>zoom: {{data.zoom}}</p>
+            <p>bounds: {{data.bounds}}</p>
+            <p>count: {{data.postamats.length}}</p>
         </div>
     </div>
 </template>
