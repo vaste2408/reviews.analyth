@@ -30,9 +30,11 @@ const data = reactive({
     center: [55.75, 37.57],
     zoom: 11,
     postamats: [],
-    action: ''
 });
 
+/**
+ * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
+ */
 function loadPostamats() {
     fetch(`/api/postamats`).then(r => {
         r.json().then(val => {
@@ -42,10 +44,31 @@ function loadPostamats() {
     });
 }
 
-function showFilteredOnMap() {
-    let _filtered = [...data.postamats];
+/**
+ * Определение цвета метки по её оценке
+ * @param mark
+ * @returns {string}
+ */
+function defineColor(mark) {
+    if (mark > 4.5)
+        return 'green';
+    if (mark > 4)
+        return 'lightgreen';
+    if (mark > 3)
+        return 'yellow';
+    if (mark > 2)
+        return 'orange';
+    return 'red';
+}
+
+/**
+ * Преобразование массива объектов в читаемый картой json
+ * @param objects
+ * @returns {{features: *[], type: string}}
+ */
+function objectsToJson(objects) {
     let _json = {type: "FeatureCollection", features: []};
-    _filtered.forEach(el => {
+    objects.forEach(el => {
         _json.features.push({
             type: "Feature",
             id: el.id,
@@ -54,40 +77,77 @@ function showFilteredOnMap() {
                 coordinates: [parseFloat(el.lat), parseFloat(el.lng)],
             },
             properties: {
+                iconContent: el.id, //содержимое метки //el.rating ?
                 balloonContentHeader: el.name,
                 balloonContentBody: `${el.address}`,
                 hintContent: `${el.name}`,
                 clusterCaption: "<strong><s>Еще</s> одна</strong> метка",
+            },
+            options: {
+                preset: "islands#circleIcon",
+                iconColor: defineColor(Math.random()*5) //el.rating
             }
         });
     });
+    return _json;
+}
+
+/**
+ * Вывести объекты на карту
+ */
+function showFilteredOnMap() {
+    objectManager.removeAll();
+    let _filtered = [...data.postamats];
+    let _json = objectsToJson(_filtered);
     objectManager.add(_json);
 }
 
+/**
+ * Коллбэк клика на карту
+ * @param payload
+ */
 function onMapClick(payload) {
     console.log(payload);
 }
 
+/**
+ * Коллбэк при инициализации карты
+ * @param map_obj
+ */
 function onMapCreated(map_obj) {
     map = map_obj;
     data.bounds = map.getBounds();
-    let om = new ymaps.ObjectManager({});
+    let om = new ymaps.ObjectManager({
+        clusterize: false,
+        gridSize: 32,
+    });
     map.geoObjects.add(om);
     objectManager = om;
     loadPostamats();
 }
 
+/**
+ * Коллбэк перемещения/зума на карте
+ * @param event
+ */
 function onBoundsChanged(event) {
     data.bounds = event.originalEvent.newBounds;
     data.center = event.originalEvent.newCenter;
     data.zoom = event.originalEvent.newZoom;
-    //showFilteredOnMap();
+    showFilteredOnMap();
 }
 
+/**
+ * Коллбэк изменения гео объектов на карте (пока не пригодился)
+ * @param event
+ */
 function onGeoUpdated(event) {
     //alert(data.postamats.length);
 }
 
+/**
+ * КОллбэк маунтед компоненты
+ */
 onMounted(async () => {
     await loadYmap(data.settings);
 });
@@ -137,7 +197,6 @@ onMounted(async () => {
                 @geo-objects-updated="onGeoUpdated"
             >
             </YandexMap>
-            <p>action: {{data.action}}</p>
             <p>center: {{data.center}}</p>
             <p>zoom: {{data.zoom}}</p>
             <p>bounds: {{data.bounds}}</p>

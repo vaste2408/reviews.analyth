@@ -11,6 +11,6 @@ class PostamatController extends Controller
 {
     public function index()
     {
-        return Postamat::where(['city' => 'Москва'])->get();
+        return Postamat::where(['city' => 'Москва'])->take(100)->get();
     }
 }
