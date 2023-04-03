@@ -7,6 +7,7 @@ use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Models\Postamat;
 use App\Models\Review;
+use App\Services\PostamatService;
 
 class ReviewController extends Controller
 {
@@ -15,7 +16,7 @@ class ReviewController extends Controller
      */
     public function index(Postamat $postamat = null)
     {
-        return $postamat ? $postamat->reviews() : Review::all();
+        return $postamat ? $postamat->reviews()->with('postamat')->get() : PostamatService::ReviewsFull();
     }
 
     /**

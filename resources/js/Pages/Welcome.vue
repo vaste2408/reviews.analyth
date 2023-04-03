@@ -50,7 +50,7 @@ const data = reactive({
  * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
  */
 function loadPostamats() {
-    fetch(`/api/postamats_for_map`).then(r => {
+    fetch(route('map.postamats')).then(r => {
         r.json().then(val => {
             data.postamats = val;
             showFilteredOnMap();
@@ -91,6 +91,7 @@ function formBalloonContentBody(el) {
         `<span>${el.address}</span>` +
         `<div title="Рейтинг: ${el.rating}">${htmlStars(el.rating)}</div>`+
         `<p>>>Последний отзыв<<</p>` +
+        `<a href="${el.id}/dashboard">К отзывам</a>` +
         `<p>Аналитика:</p>` +
         `<p>13 место из 1234 по рейтингу</p>` +
         `<p>Количество отзывов: 123</p>` +
@@ -270,13 +271,13 @@ onMounted(async () => {
                     </q-field>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/categories" v-model="data.selected_filters.category" label="Категория" clearable></LoadableSelect>
+                    <LoadableSelect url="/api/categories" v-model="data.selected_filters.category" label="Категория" clearable outlined></LoadableSelect>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/with_reviewes" v-model="data.selected_filters.with_reviewes" label="По наличию отзывов" clearable></LoadableSelect>
+                    <LoadableSelect url="/api/with_reviewes" v-model="data.selected_filters.with_reviewes" label="По наличию отзывов" clearable outlined></LoadableSelect>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/type_reviewes" v-model="data.selected_filters.type_reviewes" label="По характеру отзывов" clearable></LoadableSelect>
+                    <LoadableSelect url="/api/type_reviewes" v-model="data.selected_filters.type_reviewes" label="По характеру отзывов" clearable outlined></LoadableSelect>
                 </div>
             </div>
             <div class="w-full mt-2">

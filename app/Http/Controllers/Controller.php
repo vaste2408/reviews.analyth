@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Postamat;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -16,6 +17,12 @@ class Controller extends BaseController
         return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register')
+        ]);
+    }
+
+    public function dashboard(Postamat $postamat = null) {
+        return Inertia::render('Dashboard', [
+            'postamat' => $postamat
         ]);
     }
 }

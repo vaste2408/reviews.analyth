@@ -11,7 +11,7 @@ class PostamatService {
     }
 
     public static function PostamatsForMap () {
-        return Postamat::where(['city' => 'Москва'])->take(100)->get();
+        return Postamat::with('reviews')->where(['city' => 'Москва'])->take(100)->get();
     }
 
     public static function PostamatsWithReviews () {
@@ -23,6 +23,6 @@ class PostamatService {
     }
 
     public static function ReviewsFull () {
-        return Review::with('postamat')->with('users')->get();
+        return Review::with('postamat')->with('user')->get();
     }
 }
