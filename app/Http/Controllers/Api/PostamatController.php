@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePostamatRequest;
-use App\Http\Requests\UpdatePostamatRequest;
-use App\Models\Postamat;
+use App\Services\PostamatService;
 
 class PostamatController extends Controller
 {
     public function index()
     {
-        return Postamat::where(['city' => 'Москва'])->take(100)->get();
+        return PostamatService::Postamats();
+    }
+
+    public function forMap()
+    {
+        return PostamatService::PostamatsForMap();
     }
 }

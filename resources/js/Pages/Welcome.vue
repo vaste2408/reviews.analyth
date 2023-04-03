@@ -1,7 +1,11 @@
+<script>
+
+</script>
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import {YandexMap, YandexObjectManager, loadYmap} from 'vue-yandex-maps';
+import {Head, Link} from '@inertiajs/vue3';
+import {loadYmap, YandexMap} from 'vue-yandex-maps';
 import {onMounted, reactive} from "vue";
+import LoadableSelect from '@/components/LoadableSelect.vue'
 
 defineProps({
     canLogin: {
@@ -20,7 +24,7 @@ const data = reactive({
         apiKey: "",
         lang: "ru_RU", // Используемый язык
         coordorder: "latlong", // Порядок задания географических координат
-        debug: true, // Режим отладки
+        debug: false, // Режим отладки
         enterprise: false,
         center: [55.75, 37.57],
         version: "2.1", // Версия Я.Карт
@@ -29,14 +33,24 @@ const data = reactive({
     bounds: null,
     center: [55.75, 37.57],
     zoom: 11,
-    postamats: [],
+    postamats: [], //исходные объекты
+    filtered: [], //отфильтрованные объекты
+    selected_filters: {
+        category: null,
+        rating: {
+            min: 0,
+            max: 5
+        },
+        with_reviewes: null,
+        type_reviewes: null,
+    }
 });
 
 /**
  * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
  */
 function loadPostamats() {
-    fetch(`/api/postamats`).then(r => {
+    fetch(`/api/postamats_for_map`).then(r => {
         r.json().then(val => {
             data.postamats = val;
             showFilteredOnMap();
@@ -61,6 +75,41 @@ function defineColor(mark) {
     return 'red';
 }
 
+function htmlStars(rating) {
+    let _stars = '';
+    for (let i = 1; i <=5; i++) {
+        _stars +=
+            `<i class="q-icon notranslate material-icons text-orange" style="font-size: 2rem;" aria-hidden="true" role="presentation">
+                ${rating > i && rating < i+1 ? 'star_half' : (rating < i ? 'star_outline' : 'star')}
+                </i>`;
+    }
+    return _stars;
+}
+
+function formBalloonContentBody(el) {
+    return `` +
+        `<span>${el.address}</span>` +
+        `<div title="Рейтинг: ${el.rating}">${htmlStars(el.rating)}</div>`+
+        `<p>>>Последний отзыв<<</p>` +
+        `<p>Аналитика:</p>` +
+        `<p>13 место из 1234 по рейтингу</p>` +
+        `<p>Количество отзывов: 123</p>` +
+        `<p>Позитивных / Негативных: 45/94</p>` +
+        `<ul>Индекс удовлетворённости</ul>` +
+        `<li>По удобству: 0.5</li>` +
+        `<li>По работе курьеров: 0.5</li>` +
+        `<li>По скорости доставки: 0.5</li>` +
+        `<li>По сервису: 0.5</li>` +
+        `<li>...</li>` +
+        `<ul>По кампаниям-партнёрам:</ul>` +
+        `<li>Яндекс Маркет: 0.5</li>` +
+        `<li>OZON: 0.5</li>` +
+        `<li>Почта России: 0.5</li>` +
+        `<li>...</li>` +
+        ``
+        ;
+}
+
 /**
  * Преобразование массива объектов в читаемый картой json
  * @param objects
@@ -69,7 +118,9 @@ function defineColor(mark) {
 function objectsToJson(objects) {
     let _json = {type: "FeatureCollection", features: []};
     objects.forEach(el => {
+        el.rating = el.rating ?? Math.random()*5;
         _json.features.push({
+            //https://yandex.ru/dev/maps/jsapi/doc/2.1/ref/reference/GeoObject.html#GeoObject
             type: "Feature",
             id: el.id,
             geometry: {
@@ -77,19 +128,34 @@ function objectsToJson(objects) {
                 coordinates: [parseFloat(el.lat), parseFloat(el.lng)],
             },
             properties: {
-                iconContent: el.id, //содержимое метки //el.rating ?
+                iconContent: '', //содержимое иконки (внутри кружка)
                 balloonContentHeader: el.name,
-                balloonContentBody: `${el.address}`,
+                balloonContentBody: formBalloonContentBody(el),
                 hintContent: `${el.name}`,
                 clusterCaption: "<strong><s>Еще</s> одна</strong> метка",
             },
             options: {
-                preset: "islands#circleIcon",
-                iconColor: defineColor(Math.random()*5) //el.rating
-            }
+                balloonAutoPan: false, //перемещать карту, чтобы вместить окно балуна
+                preset: "islands#circleDotIcon",
+                iconColor: defineColor(el.rating) //el.rating
+            },
         });
     });
     return _json;
+}
+
+/**
+ * Фильтрация объектов по вхождению в границы
+ * @param objects
+ * @returns {*[]}
+ */
+function filterByBoundsFunction(objects) {
+    return [...objects].filter(el => {
+        return parseFloat(el.lat) > parseFloat(data.bounds[0][0])
+            && parseFloat(el.lat) < parseFloat(data.bounds[1][0])
+            && parseFloat(el.lng) > parseFloat(data.bounds[0][1])
+            && parseFloat(el.lng) < parseFloat(data.bounds[1][1]);
+    });
 }
 
 /**
@@ -97,9 +163,11 @@ function objectsToJson(objects) {
  */
 function showFilteredOnMap() {
     objectManager.removeAll();
-    let _filtered = [...data.postamats];
-    let _json = objectsToJson(_filtered);
-    objectManager.add(_json);
+    setTimeout(() => {
+        data.filtered = filterByBoundsFunction([...data.postamats]);
+        let _json = objectsToJson(data.filtered);
+        objectManager.add(_json);
+        }, 150);
 }
 
 /**
@@ -157,7 +225,7 @@ onMounted(async () => {
     <Head title="Main" />
 
     <div
-        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
+        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
     >
         <div v-if="canLogin" class="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
             <Link
@@ -182,25 +250,53 @@ onMounted(async () => {
                 >
             </template>
         </div>
-        <div class="w-full ">
-            <YandexMap
-                :coordinates="data.center"
-                :zoom="data.zoom"
-                :settings="data.settings"
-                :region="data.bounds"
-                :events="data.events"
-                style="height: 600px"
-                @click="onMapClick"
-                @created="onMapCreated"
-                @boundschange="onBoundsChanged"
-                @sizechange="onBoundsChanged"
-                @geo-objects-updated="onGeoUpdated"
-            >
-            </YandexMap>
-            <p>center: {{data.center}}</p>
-            <p>zoom: {{data.zoom}}</p>
-            <p>bounds: {{data.bounds}}</p>
-            <p>count: {{data.postamats.length}}</p>
+
+        <div class="w-full">
+            <div class="filters__section w-full sm:flex sm:justify-start px-2">
+                <div class="w-1/6">
+                    <q-field outlined label="Рейтинг" stack-label>
+                        <template v-slot:control>
+                            <div class="self-center full-width no-outline pl-1 pr-1" tabindex="0">
+                                <q-range
+                                    v-model="data.selected_filters.rating"
+                                    :min="0"
+                                    :max="5"
+                                    :step="0.1"
+                                    color="blue"
+                                    label
+                                />
+                            </div>
+                        </template>
+                    </q-field>
+                </div>
+                <div class="w-1/6 ml-2">
+                    <LoadableSelect url="/api/categories" v-model="data.selected_filters.category" label="Категория" clearable></LoadableSelect>
+                </div>
+                <div class="w-1/6 ml-2">
+                    <LoadableSelect url="/api/with_reviewes" v-model="data.selected_filters.with_reviewes" label="По наличию отзывов" clearable></LoadableSelect>
+                </div>
+                <div class="w-1/6 ml-2">
+                    <LoadableSelect url="/api/type_reviewes" v-model="data.selected_filters.type_reviewes" label="По характеру отзывов" clearable></LoadableSelect>
+                </div>
+            </div>
+            <div class="w-full mt-2">
+                <YandexMap
+                    :coordinates="data.center"
+                    :zoom="data.zoom"
+                    :settings="data.settings"
+                    :region="data.bounds"
+                    :events="data.events"
+                    style="height: 600px"
+                    @click="onMapClick"
+                    @created="onMapCreated"
+                    @boundschange="onBoundsChanged"
+                    @sizechange="onBoundsChanged"
+                    @geo-objects-updated="onGeoUpdated"
+                >
+                </YandexMap>
+                <p>count: {{data.postamats.length}}</p>
+                <p>filtered: {{data.filtered.length}}</p>
+            </div>
         </div>
     </div>
 </template>
