@@ -75,6 +75,12 @@ function defineColor(mark) {
     return 'red';
 }
 
+/**
+ * формирует див со звёздами
+ * @param rating
+ * @param size
+ * @returns {string}
+ */
 function htmlStars(rating, size = '1.5rem') {
     let _stars = '';
     for (let i = 1; i <=5; i++) {
@@ -83,49 +89,54 @@ function htmlStars(rating, size = '1.5rem') {
                 ${rating > i && rating < i+1 ? 'star_half' : (rating < i ? 'star_outline' : 'star')}
                 </i>`;
     }
-    return _stars;
+    return `<div title="${rating}">${_stars}</div>`;
 }
 
+/**
+ * Формирует блок отзывов
+ * @param el
+ * @returns {string}
+ */
 function reviewToHtml(el) {
     if (!el.reviews.length)
         return '';
-    let _last = `<div class="border-b p-1 border-gray-100 w-full flex">` +
-        `<div class="w-full flex">Люди пишут:</div>` +
-        `<div class="p-3 w-full q-card--bordered border-gray-100">` +
+    let _last = `<div class=" w-full flex">` +
+        `<div class="w-full flex mt-2">Люди пишут:</div>` +
+        `<div class="p-2 w-full q-card--bordered border-gray-100 shadow-box shadow-1 mb-1">` +
         `${htmlStars(el.reviews[0].score, '1rem')}` +
-        `<br/><span>${el.reviews[0].user_fio}</span>` +
-        `<br/><span>${el.reviews[0].text}</span>` +
+        `<p class="text-weight-bold m-0">${el.reviews[0].user_fio}</p>` +
+        `<p class="m-0">${el.reviews[0].text}</p>` +
         `</div>` +
-        `<a class="w-full text-primary text-center" href="${route('postamat.dashboard', el.id)}">Посмотреть все отзывы</a>` +
+        `<a target="_blank" class="w-full text-primary text-center text-decoration-none" href="${route('postamat.dashboard', el.id)}">Посмотреть все отзывы</a>` +
         `</div>`;
-    return `<div class="flex">Отзывов: ${el.reviews.length}</div>` +
-        _last;
+    return `<div class="mt-2">${htmlStars(el.rating)}</div>`
+        + `<div class="flex items-end ms-1 text-gray-800">Отзывов: ${el.reviews.length}</div>`
+        + _last;
 }
 
 function formBalloonContentBody(el) {
     return `<div class="flex">` +
-        `<span class="w-full">${el.address}</span>` +
-        `<div title="Рейтинг: ${el.rating}">${htmlStars(el.rating)}</div>`+
+        `<span class="w-full text-gray-400">${el.address}</span>` +
         reviewToHtml(el) +
-        `<div class="w-full mt-2">` +
-        `<h5 class="">Анализ отзывов:</h5>` +
+        `<div class="w-full mt-2"><hr/>` +
+        `<h6 class="w-full mt-2 text-center">Анализ отзывов:</h6>` +
         `<p>Позитивных / Негативных: 45/94</p>` +
-        `</div>` +
-        `<div class="w-full">` +
-        `<h5>Анализ постамата:</h5>` +
+        `<h6 class="w-full mt-2 text-center">Анализ постамата:</h6>` +
         `<p>13 место из 1234 по рейтингу</p>` +
-        `<ul>Индекс удовлетворённости</ul>` +
-        `<li>По удобству: 0.5</li>` +
+        `<h6 class="w-full mt-2 text-center">Индекс удовлетворённости:</h6>` +
+        `<ul class="mb-0"></ul>` +
+        `<li>По удобству расположения: 0.5</li>` +
         `<li>По работе курьеров: 0.5</li>` +
         `<li>По скорости доставки: 0.5</li>` +
         `<li>По сервису: 0.5</li>` +
-        `<ul>По кампаниям-партнёрам:</ul>` +
+        `<h6 class="w-full mt-2 text-center">По кампаниям-партнёрам:</h6>` +
+        `<ul class="mb-0"></ul>` +
         `<li>Яндекс Маркет: 0.5</li>` +
         `<li>OZON: 0.5</li>` +
         `<li>Почта России: 0.5</li>` +
         `</div>` +
-        `<a class="w-full text-primary text-center" href="${route('postamat.dashboard', el.id)}">Подробный анализ</a>` +
-        `</div>`;
+        `<a target="_blank" class="w-full text-primary text-center text-decoration-none mt-2" href="${route('postamat.dashboard', el.id)}">Подобрный анализ</a>` +
+    `</div>`;
 }
 
 /**

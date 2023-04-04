@@ -1,5 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
+//import '../scss/styles.scss' //if u want BS
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 
