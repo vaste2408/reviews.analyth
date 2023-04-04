@@ -75,40 +75,57 @@ function defineColor(mark) {
     return 'red';
 }
 
-function htmlStars(rating) {
+function htmlStars(rating, size = '1.5rem') {
     let _stars = '';
     for (let i = 1; i <=5; i++) {
         _stars +=
-            `<i class="q-icon notranslate material-icons text-orange" style="font-size: 2rem;" aria-hidden="true" role="presentation">
+            `<i class="q-icon notranslate material-icons text-orange" style="font-size: ${size};" aria-hidden="true" role="presentation">
                 ${rating > i && rating < i+1 ? 'star_half' : (rating < i ? 'star_outline' : 'star')}
                 </i>`;
     }
     return _stars;
 }
 
+function reviewToHtml(el) {
+    if (!el.reviews.length)
+        return '';
+    let _last = `<div class="border-b p-1 border-gray-100 w-full flex">` +
+        `<div class="w-full flex">Люди пишут:</div>` +
+        `<div class="p-3 w-full q-card--bordered border-gray-100">` +
+        `${htmlStars(el.reviews[0].score, '1rem')}` +
+        `<br/><span>${el.reviews[0].user_fio}</span>` +
+        `<br/><span>${el.reviews[0].text}</span>` +
+        `</div>` +
+        `<a class="w-full text-primary text-center" href="${route('postamat.dashboard', el.id)}">Посмотреть все отзывы</a>` +
+        `</div>`;
+    return `<div class="flex">Отзывов: ${el.reviews.length}</div>` +
+        _last;
+}
+
 function formBalloonContentBody(el) {
-    return `` +
-        `<span>${el.address}</span>` +
+    return `<div class="flex">` +
+        `<span class="w-full">${el.address}</span>` +
         `<div title="Рейтинг: ${el.rating}">${htmlStars(el.rating)}</div>`+
-        `<p>>>Последний отзыв<<</p>` +
-        `<a href="${el.id}/dashboard">К отзывам</a>` +
-        `<p>Аналитика:</p>` +
-        `<p>13 место из 1234 по рейтингу</p>` +
-        `<p>Количество отзывов: 123</p>` +
+        reviewToHtml(el) +
+        `<div class="w-full mt-2">` +
+        `<h5 class="">Анализ отзывов:</h5>` +
         `<p>Позитивных / Негативных: 45/94</p>` +
+        `</div>` +
+        `<div class="w-full">` +
+        `<h5>Анализ постамата:</h5>` +
+        `<p>13 место из 1234 по рейтингу</p>` +
         `<ul>Индекс удовлетворённости</ul>` +
         `<li>По удобству: 0.5</li>` +
         `<li>По работе курьеров: 0.5</li>` +
         `<li>По скорости доставки: 0.5</li>` +
         `<li>По сервису: 0.5</li>` +
-        `<li>...</li>` +
         `<ul>По кампаниям-партнёрам:</ul>` +
         `<li>Яндекс Маркет: 0.5</li>` +
         `<li>OZON: 0.5</li>` +
         `<li>Почта России: 0.5</li>` +
-        `<li>...</li>` +
-        ``
-        ;
+        `</div>` +
+        `<a class="w-full text-primary text-center" href="${route('postamat.dashboard', el.id)}">Подробный анализ</a>` +
+        `</div>`;
 }
 
 /**

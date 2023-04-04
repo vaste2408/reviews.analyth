@@ -24,5 +24,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::get('/dashboard', [Controller::class, 'dashboard'])->name('dashboard');
-Route::get('{postamat}/dashboard', [Controller::class, 'dashboard'])->name('postamat.dashboard');
+Route::get('postamats/{postamat}/dashboard', [Controller::class, 'dashboard'])->name('postamat.dashboard');
+Route::get('postamats/{postamat}', [Controller::class, 'info'])->name('postamat.info');
 require __DIR__.'/auth.php';
