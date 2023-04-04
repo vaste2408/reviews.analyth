@@ -14,6 +14,6 @@ class Postamat extends Model
 
     public function reviews(): HasMany
     {
-        return $this->hasMany(Review::class, 'postamat_id');
+        return $this->hasMany(Review::class, 'postamat_id')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
     }
 }

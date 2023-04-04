@@ -32,7 +32,9 @@ class ReviewController extends Controller
      */
     public function store(StoreReviewRequest $request)
     {
-        dd($request->validated());
+        $data = $request->validated();
+        Review::create($data);
+        return redirect()->route('welcome')->with('success', 'Review created');
     }
 
     /**

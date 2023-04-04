@@ -12,6 +12,14 @@ class Review extends Model
 
     protected $table = 'reviews';
 
+    protected $fillable = [
+        'postamat_id',
+        'user_id',
+        'user_fio',
+        'text',
+        'score'
+    ];
+
     public function postamat() : BelongsTo {
         return $this->belongsTo(Postamat::class);
     }

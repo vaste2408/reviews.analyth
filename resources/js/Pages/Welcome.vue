@@ -345,7 +345,7 @@ onMounted(async () => {
             <q-dialog v-model="showNewReviewDialog">
                 <q-card class="w-3/4">
                     <q-card-section>
-                        <q-form action="{{route('api.reviews.create')}}" method="post"
+                        <q-form :action="route('api.reviews.create')" method="post"
                                 @reset="onResetReviewForm"
                         >
                             <div class="q-gutter-y-md column">
@@ -357,10 +357,12 @@ onMounted(async () => {
                                     icon-selected="star"
                                 />
                             </div>
-                            <q-input name="firstname" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
+                            <q-input name="postamat_id" v-model="data.current_postamat.id" />
+                            <q-input name="score" v-model="newReviewRating" />
+                            <q-input name="user_fio" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
                                      :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
                             />
-                            <q-input name="firstname" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
+                            <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
                                      type="textarea"
                                      lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, напишите что-нибудь']"
                             />

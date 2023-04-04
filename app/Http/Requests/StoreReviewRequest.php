@@ -11,7 +11,7 @@ class StoreReviewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,8 @@ class StoreReviewRequest extends FormRequest
         return [
             'postamat_id' => 'required',
             'text' => 'required | string',
-            'user_fio' => 'required | string'
+            'user_fio' => 'required | string',
+            'score' => 'required'
         ];
     }
 }
