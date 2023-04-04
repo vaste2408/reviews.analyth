@@ -34,7 +34,7 @@ class ReviewController extends Controller
     {
         $data = $request->validated();
         Review::create($data);
-        return redirect()->route('welcome')->with('success', 'Review created');
+        return response()->json(['success' => true], 201);
     }
 
     /**

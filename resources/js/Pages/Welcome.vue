@@ -194,9 +194,34 @@ function onResetReviewForm() {
     newReviewText.value = '';
     newReviewFio.value = '';
 }
+function onSubmitReviewForm() {
+    axios.post(route('api.reviews.create'), {
+        postamat_id: data.current_postamat.id,
+        text: newReviewText.value,
+        user_fio: newReviewFio.value,
+        score: newReviewRating.value
+    })
+    .then(function (response) {
+        if (response.data.success) {
+            hidePostamatBalloon();
+            hideNewReviewDialog();
+            hideAnalythicDialog();
+            loadPostamats();
+        }
+    })
+    .catch(function (error) {
+        console.log(error);
+    });
+}
+function hideNewReviewDialog() {
+    showNewReviewDialog.value = false;
+}
 
 //форма аналитики
 const showAnalythicDialog = ref(false);
+function hideAnalythicDialog() {
+    showAnalythicDialog.value = false;
+}
 /**
  * Коллбэк маунтед компоненты
  */
@@ -291,22 +316,22 @@ onMounted(async () => {
                         <div class="text-h6">{{data.current_postamat.name}}</div>
                         <div class="text-subtitle2">{{data.current_postamat.address}}</div>
                     </q-card-section>
+                    <q-card-section class="q-pt-none">
+                        <div class="flex no-wrap items-center">
+                            <q-rating
+                                v-model="data.current_postamat.rating"
+                                :title="data.current_postamat.rating"
+                                readonly
+                                size="2em"
+                                color="orange-5"
+                                icon="star_border"
+                                icon-selected="star"
+                            />
+                            <span class="text-gray-600 q-ml-sm text-subtitle1">{{data.current_postamat.rating}} ({{ data.current_postamat.reviews.length }})</span>
+                            <q-btn class="ml-4" label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
+                        </div>
+                    </q-card-section>
                     <template v-if="data.current_postamat.reviews.length">
-                        <q-card-section class="q-pt-none">
-                            <div class="flex no-wrap items-center">
-                                <q-rating
-                                    v-model="data.current_postamat.rating"
-                                    :title="data.current_postamat.rating"
-                                    readonly
-                                    size="2em"
-                                    color="orange-5"
-                                    icon="star_border"
-                                    icon-selected="star"
-                                />
-                                <span class="text-gray-600 q-ml-sm text-subtitle1">{{data.current_postamat.rating}} ({{ data.current_postamat.reviews.length }})</span>
-                                <q-btn class="ml-4" label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
-                            </div>
-                        </q-card-section>
                         <q-card-section class="q-pt-none">
                             <div class="text-h6">Люди пишут:</div>
                             <q-card>
@@ -345,8 +370,9 @@ onMounted(async () => {
             <q-dialog v-model="showNewReviewDialog">
                 <q-card class="w-3/4">
                     <q-card-section>
-                        <q-form :action="route('api.reviews.create')" method="post"
-                                @reset="onResetReviewForm"
+                        <q-form
+                            @submit.prevent="onSubmitReviewForm"
+                            @reset="onResetReviewForm"
                         >
                             <div class="q-gutter-y-md column">
                                 <q-rating
@@ -357,8 +383,6 @@ onMounted(async () => {
                                     icon-selected="star"
                                 />
                             </div>
-                            <q-input name="postamat_id" v-model="data.current_postamat.id" />
-                            <q-input name="score" v-model="newReviewRating" />
                             <q-input name="user_fio" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
                                      :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
                             />
