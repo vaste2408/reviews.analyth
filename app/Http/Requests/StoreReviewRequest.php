@@ -22,7 +22,9 @@ class StoreReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'postamat_id' => 'required',
+            'text' => 'required | string',
+            'user_fio' => 'required | string'
         ];
     }
 }

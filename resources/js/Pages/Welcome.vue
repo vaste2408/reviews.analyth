@@ -4,8 +4,9 @@
 <script setup>
 import {Head, Link} from '@inertiajs/vue3';
 import {loadYmap, YandexMap} from 'vue-yandex-maps';
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import LoadableSelect from '@/components/LoadableSelect.vue'
+import Dashboard from "@/Pages/Dashboard.vue";
 
 defineProps({
     canLogin: {
@@ -19,8 +20,10 @@ defineProps({
 let map = null;
 let objectManager = [];
 
+const showDialog = ref(true);
+
 const data = reactive({
-    settings: {
+    settings: { //map settings
         apiKey: "",
         lang: "ru_RU", // Используемый язык
         coordorder: "latlong", // Порядок задания географических координат
@@ -29,7 +32,7 @@ const data = reactive({
         center: [55.75, 37.57],
         version: "2.1", // Версия Я.Карт
     },
-    events: ['click', 'created', 'boundschange', 'sizechange', 'geo-objects-updated'],
+    events: ['click', 'created', 'boundschange', 'sizechange', 'geo-objects-updated', 'balloonopen'],
     bounds: null,
     center: [55.75, 37.57],
     zoom: 11,
@@ -43,7 +46,9 @@ const data = reactive({
         },
         with_reviewes: null,
         type_reviewes: null,
-    }
+    },
+    current_postamat: null,
+    showPostamatBalloon: false,
 });
 
 /**
@@ -76,70 +81,6 @@ function defineColor(mark) {
 }
 
 /**
- * формирует див со звёздами
- * @param rating
- * @param size
- * @returns {string}
- */
-function htmlStars(rating, size = '1.5rem') {
-    let _stars = '';
-    for (let i = 1; i <=5; i++) {
-        _stars +=
-            `<i class="q-icon notranslate material-icons text-orange" style="font-size: ${size};" aria-hidden="true" role="presentation">
-                ${rating > i && rating < i+1 ? 'star_half' : (rating < i ? 'star_outline' : 'star')}
-                </i>`;
-    }
-    return `<div title="${rating}">${_stars}</div>`;
-}
-
-/**
- * Формирует блок отзывов
- * @param el
- * @returns {string}
- */
-function reviewToHtml(el) {
-    if (!el.reviews.length)
-        return '';
-    let _last = `<div class=" w-full flex">` +
-        `<div class="w-full flex mt-2">Люди пишут:</div>` +
-        `<div class="p-2 w-full q-card--bordered border-gray-100 shadow-box shadow-1 mb-1">` +
-        `${htmlStars(el.reviews[0].score, '1rem')}` +
-        `<p class="text-weight-bold m-0">${el.reviews[0].user_fio}</p>` +
-        `<p class="m-0">${el.reviews[0].text}</p>` +
-        `</div>` +
-        `<a target="_blank" class="w-full text-primary text-center text-decoration-none" href="${route('postamat.dashboard', el.id)}">Посмотреть все отзывы</a>` +
-        `</div>`;
-    return `<div class="mt-2">${htmlStars(el.rating)}</div>`
-        + `<div class="flex items-end ms-1 text-gray-800">Отзывов: ${el.reviews.length}</div>`
-        + _last;
-}
-
-function formBalloonContentBody(el) {
-    return `<div class="flex">` +
-        `<span class="w-full text-gray-400">${el.address}</span>` +
-        reviewToHtml(el) +
-        `<div class="w-full mt-2"><hr/>` +
-        `<h6 class="w-full mt-2 text-center">Анализ отзывов:</h6>` +
-        `<p>Позитивных / Негативных: 45/94</p>` +
-        `<h6 class="w-full mt-2 text-center">Анализ постамата:</h6>` +
-        `<p>13 место из 1234 по рейтингу</p>` +
-        `<h6 class="w-full mt-2 text-center">Индекс удовлетворённости:</h6>` +
-        `<ul class="mb-0"></ul>` +
-        `<li>По удобству расположения: 0.5</li>` +
-        `<li>По работе курьеров: 0.5</li>` +
-        `<li>По скорости доставки: 0.5</li>` +
-        `<li>По сервису: 0.5</li>` +
-        `<h6 class="w-full mt-2 text-center">По кампаниям-партнёрам:</h6>` +
-        `<ul class="mb-0"></ul>` +
-        `<li>Яндекс Маркет: 0.5</li>` +
-        `<li>OZON: 0.5</li>` +
-        `<li>Почта России: 0.5</li>` +
-        `</div>` +
-        `<a target="_blank" class="w-full text-primary text-center text-decoration-none mt-2" href="${route('postamat.dashboard', el.id)}">Подобрный анализ</a>` +
-    `</div>`;
-}
-
-/**
  * Преобразование массива объектов в читаемый картой json
  * @param objects
  * @returns {{features: *[], type: string}}
@@ -147,11 +88,12 @@ function formBalloonContentBody(el) {
 function objectsToJson(objects) {
     let _json = {type: "FeatureCollection", features: []};
     objects.forEach(el => {
-        el.rating = el.rating ?? Math.random()*5;
+        el.rating = el.rating ?? (Math.random()*5).toFixed(2);
         _json.features.push({
             //https://yandex.ru/dev/maps/jsapi/doc/2.1/ref/reference/GeoObject.html#GeoObject
             type: "Feature",
             id: el.id,
+            postamat: el,
             geometry: {
                 type: "Point",
                 coordinates: [parseFloat(el.lat), parseFloat(el.lng)],
@@ -159,14 +101,13 @@ function objectsToJson(objects) {
             properties: {
                 iconContent: '', //содержимое иконки (внутри кружка)
                 balloonContentHeader: el.name,
-                balloonContentBody: formBalloonContentBody(el),
+                balloonContentBody: el,
                 hintContent: `${el.name}`,
-                clusterCaption: "<strong><s>Еще</s> одна</strong> метка",
             },
             options: {
                 balloonAutoPan: false, //перемещать карту, чтобы вместить окно балуна
                 preset: "islands#circleDotIcon",
-                iconColor: defineColor(el.rating) //el.rating
+                iconColor: defineColor(el.rating), //el.rating
             },
         });
     });
@@ -200,11 +141,15 @@ function showFilteredOnMap() {
 }
 
 /**
- * Коллбэк клика на карту
- * @param payload
+ * Событие при открытии баллуна на карте
+ * @param evt
  */
-function onMapClick(payload) {
-    console.log(payload);
+function onBalloonOpened(evt) {
+    let _target = evt.get('target');
+    let _postamat = _target.balloon.getData().postamat;
+    _target.balloon.close();
+    data.current_postamat = _postamat;
+    data.showPostamatBalloon = true;
 }
 
 /**
@@ -234,16 +179,26 @@ function onBoundsChanged(event) {
     showFilteredOnMap();
 }
 
-/**
- * Коллбэк изменения гео объектов на карте (пока не пригодился)
- * @param event
- */
-function onGeoUpdated(event) {
-    //alert(data.postamats.length);
+function hidePostamatBalloon() {
+    data.current_postamat = null;
+    data.showPostamatBalloon = false;
 }
 
+//форма написания отзыва
+const showNewReviewDialog = ref(false);
+const newReviewRating = ref(3);
+const newReviewText = ref('');
+const newReviewFio = ref('');
+function onResetReviewForm() {
+    newReviewRating.value = 3;
+    newReviewText.value = '';
+    newReviewFio.value = '';
+}
+
+//форма аналитики
+const showAnalythicDialog = ref(false);
 /**
- * КОллбэк маунтед компоненты
+ * Коллбэк маунтед компоненты
  */
 onMounted(async () => {
     await loadYmap(data.settings);
@@ -316,16 +271,119 @@ onMounted(async () => {
                     :region="data.bounds"
                     :events="data.events"
                     style="height: 600px"
-                    @click="onMapClick"
                     @created="onMapCreated"
                     @boundschange="onBoundsChanged"
                     @sizechange="onBoundsChanged"
-                    @geo-objects-updated="onGeoUpdated"
+                    @balloonopen="onBalloonOpened"
                 >
                 </YandexMap>
                 <p>count: {{data.postamats.length}}</p>
                 <p>filtered: {{data.filtered.length}}</p>
+                <p>current_postamat: {{data.current_postamat}}</p>
+                <p>showDialog: {{data.showPostamatBalloon}}</p>
             </div>
+            <!--КАРТОЧКА ПОСТАМАТА-->
+            <q-dialog v-model="data.showPostamatBalloon"
+                      @hide="hidePostamatBalloon"
+            >
+                <q-card class="my-card w-3/4">
+                    <q-card-section>
+                        <div class="text-h6">{{data.current_postamat.name}}</div>
+                        <div class="text-subtitle2">{{data.current_postamat.address}}</div>
+                    </q-card-section>
+                    <template v-if="data.current_postamat.reviews.length">
+                        <q-card-section class="q-pt-none">
+                            <div class="flex no-wrap items-center">
+                                <q-rating
+                                    v-model="data.current_postamat.rating"
+                                    :title="data.current_postamat.rating"
+                                    readonly
+                                    size="2em"
+                                    color="orange-5"
+                                    icon="star_border"
+                                    icon-selected="star"
+                                />
+                                <span class="text-gray-600 q-ml-sm text-subtitle1">{{data.current_postamat.rating}} ({{ data.current_postamat.reviews.length }})</span>
+                                <q-btn class="ml-4" label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
+                            </div>
+                        </q-card-section>
+                        <q-card-section class="q-pt-none">
+                            <div class="text-h6">Люди пишут:</div>
+                            <q-card>
+                                <q-card-section>
+                                    <q-rating
+                                        v-model="data.current_postamat.reviews[0].score"
+                                        :title="data.current_postamat.reviews[0].score"
+                                        readonly
+                                        size="1em"
+                                        color="orange-5"
+                                        icon="star_border"
+                                        icon-selected="star"
+                                    />
+                                    <div class="text-subtitle1">{{data.current_postamat.reviews[0].user_fio}}</div>
+                                    <div class="text-h6">{{data.current_postamat.reviews[0].text}}</div>
+                                </q-card-section>
+                            </q-card>
+                        </q-card-section>
+                        <q-card-section class="q-pt-none">
+                            <div class="flex justify-center">
+                                <a :href="route('postamat.info', data.current_postamat)" target="_blank" class="text-primary">Перейти к отзывам</a>
+                            </div>
+                        </q-card-section>
+                        <q-card-section>
+                            <q-btn label="Аналитика" @click="showAnalythicDialog=true"></q-btn>
+                        </q-card-section>
+                    </template>
+                    <template v-else>
+                        <q-card-section class="q-pt-none">
+                            <div class="text-h6">Ещё не было отзывов</div>
+                        </q-card-section>
+                    </template>
+                </q-card>
+            </q-dialog>
+            <!--КАРТОЧКА СОЗДАНИЯ ОТЗЫВА-->
+            <q-dialog v-model="showNewReviewDialog">
+                <q-card class="w-3/4">
+                    <q-card-section>
+                        <q-form action="{{route('api.reviews.create')}}" method="post"
+                                @reset="onResetReviewForm"
+                        >
+                            <div class="q-gutter-y-md column">
+                                <q-rating
+                                    v-model="newReviewRating"
+                                    size="3em"
+                                    color="orange-5"
+                                    icon="star_border"
+                                    icon-selected="star"
+                                />
+                            </div>
+                            <q-input name="firstname" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
+                                     :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
+                            />
+                            <q-input name="firstname" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
+                                     type="textarea"
+                                     lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, напишите что-нибудь']"
+                            />
+                            <div class="mt-2">
+                                <q-btn label="Сохранить" type="submit" color="primary"/>
+                                <q-btn label="Отмена" type="reset" color="primary" flat class="q-ml-sm" />
+                            </div>
+                        </q-form>
+                    </q-card-section>
+                </q-card>
+            </q-dialog>
+            <!--КАРТОЧКА АНАЛИТИКИ-->
+            <q-dialog v-model="showAnalythicDialog" full-width full-height>
+                <q-card>
+                    <q-card-section class="row items-center q-pb-none">
+                        <q-space />
+                        <q-btn icon="close" flat round dense v-close-popup />
+                    </q-card-section>
+                    <q-card-section class="q-pt-none">
+                        <Dashboard :postamat="data.current_postamat"></Dashboard>
+                    </q-card-section>
+                </q-card>
+            </q-dialog>
         </div>
     </div>
 </template>

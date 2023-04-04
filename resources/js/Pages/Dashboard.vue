@@ -82,6 +82,7 @@ const colors = ['red', 'lightgray', '#21BA45'];
     <Head title="Dashboard" />
 
     <div class="w-full p-5">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="data.postamat">{{data.postamat.name}}</h2>
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Аналитика отзывов</h2>
         <div class="filters__section w-full sm:flex sm:justify-start mt-2" v-show="!postamat">
             <div class="w-1/6">
@@ -96,8 +97,6 @@ const colors = ['red', 'lightgray', '#21BA45'];
                 ></q-select>
             </div>
         </div>
-        {{data.postamat}}
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="data.postamat">{{data.postamat.name}}</h2>
         <div class="w-full mt-2">
             <q-table
                 flat bordered

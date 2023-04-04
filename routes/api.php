@@ -33,3 +33,4 @@ Route::get('postamats', [PostamatController::class, 'index'])->name('api.postama
 Route::get('postamats_for_map', [PostamatController::class, 'forMap'])->name('map.postamats'); //ограниченные для карты
 Route::get('postamat/{postamat}/reviews', [ReviewController::class, 'index'])->name('api.postamat.reviews'); //отзывы постамата
 Route::get('reviews', [ReviewController::class, 'index'])->name('api.reviews'); //все отзывы
+Route::post('reviews', [ReviewController::class, 'store'])->name('api.reviews.create');
