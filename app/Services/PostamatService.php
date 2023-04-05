@@ -10,8 +10,30 @@ class PostamatService {
         return Postamat::all();
     }
 
-    public static function PostamatsForMap () {
-        return Postamat::with('reviews')->where(['city' => 'Москва'])->take(100)->get();
+    public static function PostamatsForMap ($filters = []) {
+        $query = Postamat::with('reviews')->take(100);
+        $where = ['city' => 'Москва'];
+        if ($filters['rating_min'] != 0 || $filters['rating_max'] != 5) {
+            $query->whereBetween('rating', [$filters['rating_min'], $filters['rating_max']]);
+        }
+
+        if (isset($filters['with_reviews'])) {
+            if ($filters['with_reviews']) {
+                $query->whereHas('reviews');
+            }
+            if ($filters['with_reviews']) {
+                $query->doesntHave('reviews');
+            }
+        }
+        //TODO по характеру отзывов
+        if (isset($filters['type'])) {
+
+        }
+        //TODO категориям отзывов
+        if (isset($filters['category'])) {
+
+        }
+        return $query->where($where)->get();
     }
 
     public static function PostamatsWithReviews () {

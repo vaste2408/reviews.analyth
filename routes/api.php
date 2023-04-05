@@ -22,13 +22,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('categories', function () {
     return [['label' => '1', 'value' => '2']];
-});
-Route::get('with_reviewes', function () {
+})->name('api.categories');
+Route::get('with_reviews', function () {
     return [['label' => 'С отзывами', 'value' => 1], ['label' => 'Без отзывов', 'value' => 0]];
-});
-Route::get('type_reviewes', function () {
+})->name('api.with_reviews');
+Route::get('type_reviews', function () {
     return [['label' => 'Позитивные', 'value' => 1], ['label' => 'Негативные', 'value' => -1], ['label' => 'Нейтральные', 'value' => 0]];
-});
+})->name('api.type_reviews');
 Route::get('postamats', [PostamatController::class, 'index'])->name('api.postamats'); //все постаматы
 Route::get('postamats_for_map', [PostamatController::class, 'forMap'])->name('map.postamats'); //ограниченные для карты
 Route::get('postamat/{postamat}/reviews', [ReviewController::class, 'index'])->name('api.postamat.reviews'); //отзывы постамата

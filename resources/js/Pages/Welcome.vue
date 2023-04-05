@@ -20,8 +20,6 @@ defineProps({
 let map = null;
 let objectManager = [];
 
-const showDialog = ref(true);
-
 const data = reactive({
     settings: { //map settings
         apiKey: "",
@@ -44,8 +42,8 @@ const data = reactive({
             min: 0,
             max: 5
         },
-        with_reviewes: null,
-        type_reviewes: null,
+        with_reviews: null,
+        type_reviews: null,
     },
     current_postamat: null,
     showPostamatBalloon: false,
@@ -55,11 +53,41 @@ const data = reactive({
  * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
  */
 function loadPostamats() {
-    fetch(route('map.postamats')).then(r => {
-        r.json().then(val => {
-            data.postamats = val;
+    console.log(data.selected_filters.category);
+    axios.get(route('map.postamats'), {
+        params: {
+            bounds: data.bounds,
+            center: data.center,
+            zoom: data.zoom,
+            rating_min: data.selected_filters.rating.min,
+            rating_max: data.selected_filters.rating.max,
+            category: data.selected_filters.category,
+            type: data.selected_filters.type_reviews,
+            with_reviews: data.selected_filters.with_reviews,
+        }
+    })
+    .then(function (response) {
+        if (response.data) {
+            data.postamats = response.data;
             showFilteredOnMap();
-        });
+        }
+    })
+    .catch(function (error) {
+        console.log(error);
+    });
+}
+
+/**
+ * Фильтрация объектов по вхождению в границы
+ * @param objects
+ * @returns {*[]}
+ */
+function filterByBoundsFunction(objects) {
+    return [...objects].filter(el => {
+        return parseFloat(el.lat) > parseFloat(data.bounds[0][0])
+            && parseFloat(el.lat) < parseFloat(data.bounds[1][0])
+            && parseFloat(el.lng) > parseFloat(data.bounds[0][1])
+            && parseFloat(el.lng) < parseFloat(data.bounds[1][1]);
     });
 }
 
@@ -112,20 +140,6 @@ function objectsToJson(objects) {
         });
     });
     return _json;
-}
-
-/**
- * Фильтрация объектов по вхождению в границы
- * @param objects
- * @returns {*[]}
- */
-function filterByBoundsFunction(objects) {
-    return [...objects].filter(el => {
-        return parseFloat(el.lat) > parseFloat(data.bounds[0][0])
-            && parseFloat(el.lat) < parseFloat(data.bounds[1][0])
-            && parseFloat(el.lng) > parseFloat(data.bounds[0][1])
-            && parseFloat(el.lng) < parseFloat(data.bounds[1][1]);
-    });
 }
 
 /**
@@ -267,11 +281,11 @@ onMounted(async () => {
                         <template v-slot:control>
                             <div class="self-center full-width no-outline pl-1 pr-1" tabindex="0">
                                 <q-range
-                                    v-model="data.selected_filters.rating"
+                                    :model-value="data.selected_filters.rating"
+                                    @change="val => { data.selected_filters.rating = val; loadPostamats();}"
                                     :min="0"
                                     :max="5"
                                     :step="0.1"
-                                    color="blue"
                                     label
                                 />
                             </div>
@@ -279,13 +293,28 @@ onMounted(async () => {
                     </q-field>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/categories" v-model="data.selected_filters.category" label="Категория" clearable outlined></LoadableSelect>
+                    <LoadableSelect
+                        clearable outlined emit-value map-options
+                        :url="route('api.categories')"
+                        v-model="data.selected_filters.category"
+                        @update:model-value="loadPostamats"
+                        label="Категория"></LoadableSelect>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/with_reviewes" v-model="data.selected_filters.with_reviewes" label="По наличию отзывов" clearable outlined></LoadableSelect>
+                    <LoadableSelect
+                        clearable outlined emit-value map-options
+                        :url="route('api.with_reviews')"
+                        v-model="data.selected_filters.with_reviews"
+                        @update:model-value="loadPostamats"
+                        label="По наличию отзывов"></LoadableSelect>
                 </div>
                 <div class="w-1/6 ml-2">
-                    <LoadableSelect url="/api/type_reviewes" v-model="data.selected_filters.type_reviewes" label="По характеру отзывов" clearable outlined></LoadableSelect>
+                    <LoadableSelect
+                        clearable outlined emit-value map-options
+                        :url="route('api.type_reviews')"
+                        v-model="data.selected_filters.type_reviews"
+                        @update:model-value="loadPostamats"
+                        label="По характеру отзывов"></LoadableSelect>
                 </div>
             </div>
             <div class="w-full mt-2">
@@ -304,8 +333,6 @@ onMounted(async () => {
                 </YandexMap>
                 <p>count: {{data.postamats.length}}</p>
                 <p>filtered: {{data.filtered.length}}</p>
-                <p>current_postamat: {{data.current_postamat}}</p>
-                <p>showDialog: {{data.showPostamatBalloon}}</p>
             </div>
             <!--КАРТОЧКА ПОСТАМАТА-->
             <q-dialog v-model="data.showPostamatBalloon"

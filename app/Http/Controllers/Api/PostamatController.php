@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PostamatsRequest;
 use App\Services\PostamatService;
 
 class PostamatController extends Controller
@@ -12,8 +13,9 @@ class PostamatController extends Controller
         return PostamatService::Postamats();
     }
 
-    public function forMap()
+    public function forMap(PostamatsRequest $request)
     {
-        return PostamatService::PostamatsForMap();
+        $data = $request->validated();
+        return PostamatService::PostamatsForMap($data);
     }
 }
