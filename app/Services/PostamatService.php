@@ -21,7 +21,7 @@ class PostamatService {
             if ($filters['with_reviews']) {
                 $query->whereHas('reviews');
             }
-            if ($filters['with_reviews']) {
+            else {
                 $query->doesntHave('reviews');
             }
         }
