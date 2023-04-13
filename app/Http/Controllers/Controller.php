@@ -27,7 +27,7 @@ class Controller extends BaseController
     }
 
     public function info(Postamat $postamat) {
-        return Inertia::render('Postamat', [
+        return Inertia::render('Card', [
             'postamat' => $postamat
         ]);
     }

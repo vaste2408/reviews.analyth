@@ -23,10 +23,12 @@ const data = reactive({
         {name: 'address', required: false, label: 'Адрес', align: 'left', field: row => row.postamat.address, format: val => `${val}`, sortable: true},
         {name: 'score', required: true, label: 'Оценка', align: 'left', field: row => row.score, format: val => `${val}`, sortable: true},
         {name: 'text', required: false, label: 'Текст', align: 'left', field: row => row.text, format: val => `${val}`},
+        {name: 'confirmed', required: true, label: 'Подтверждено', align: 'left', field: row => row.confirmed, format: val => `${val}`},
         {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion, format: val => `${val}`, sortable: true},
         {name: 'category', required: false, label: 'Категория', align: 'left', field: row => row.category, format: val => `${val}`, sortable: true},
         {name: 'influ_cat', required: false, label: 'Влияние на категорию', align: 'left', field: row => row.influ_cat, format: val => `${val}`, sortable: true},
         {name: 'influ_post', required: false, label: 'Влияние на постамат', align: 'left', field: row => row.influ_post, format: val => `${val}`, sortable: true},
+        {name: 'buttons', required: false, label: '', align: 'right', field: row => row.id, sortable: false},
     ],
     reviews_pagination: {
         sortBy: 'postamat',
@@ -61,6 +63,22 @@ function loadReviews() {
             data.reviews_loading = false;
         });
     });
+}
+
+function confirmReview(review) {
+    review.confirmed = true;
+    axios.post(route('api.reviews.update', review), {
+        confirmed: review.confirmed,
+    })
+    .then(function (response) {
+    })
+    .catch(function (error) {
+        review.confirmed = false;
+        console.log(error);
+    });
+}
+function analythReview(review) {
+    alert(review.id);
 }
 
 onMounted(async () => {
@@ -116,6 +134,25 @@ const colors = ['red', 'lightgray', '#21BA45'];
                             <q-icon name="search" />
                         </template>
                     </q-input>
+                </template>
+                <template v-slot:body="props">
+                    <q-tr :props="props">
+                        <q-td v-for="column in data.reviews_columns" :key="column.name" :props="props">
+                            <template v-if="column.name === 'buttons'">
+                                <q-btn outline round color="green" size="sm" icon="check"
+                                       class="q-mr-sm"
+                                       @click="confirmReview(props.row)"
+                                       title="Подтвердить" />
+                                <q-btn outline round color="primary" size="sm" icon="search"
+                                       class="q-mr-sm"
+                                       @click="analythReview(props.row)"
+                                       title="Исследовать" />
+                            </template>
+                            <template v-else>
+                                {{column.field(props.row)}}
+                            </template>
+                        </q-td>
+                    </q-tr>
                 </template>
             </q-table>
             {{data.reviews}}

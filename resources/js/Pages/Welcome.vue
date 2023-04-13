@@ -7,6 +7,7 @@ import {loadYmap, YandexMap} from 'vue-yandex-maps';
 import {onMounted, reactive, ref} from "vue";
 import LoadableSelect from '@/components/LoadableSelect.vue'
 import Dashboard from "@/Pages/Dashboard.vue";
+import Review from "@/Pages/Reviews/Components/review.vue";
 
 defineProps({
     canLogin: {
@@ -53,7 +54,6 @@ const data = reactive({
  * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
  */
 function loadPostamats() {
-    console.log(data.selected_filters.category);
     axios.get(route('map.postamats'), {
         params: {
             bounds: data.bounds,
@@ -361,21 +361,7 @@ onMounted(async () => {
                     <template v-if="data.current_postamat.reviews.length">
                         <q-card-section class="q-pt-none">
                             <div class="text-h6">Люди пишут:</div>
-                            <q-card>
-                                <q-card-section>
-                                    <q-rating
-                                        v-model="data.current_postamat.reviews[0].score"
-                                        :title="data.current_postamat.reviews[0].score"
-                                        readonly
-                                        size="1em"
-                                        color="orange-5"
-                                        icon="star_border"
-                                        icon-selected="star"
-                                    />
-                                    <div class="text-subtitle1">{{data.current_postamat.reviews[0].user_fio}}</div>
-                                    <div class="text-h6">{{data.current_postamat.reviews[0].text}}</div>
-                                </q-card-section>
-                            </q-card>
+                            <Review :review="data.current_postamat.reviews[0]" />
                         </q-card-section>
                         <q-card-section class="q-pt-none">
                             <div class="flex justify-center">

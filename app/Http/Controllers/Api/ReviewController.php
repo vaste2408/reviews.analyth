@@ -58,7 +58,9 @@ class ReviewController extends Controller
      */
     public function update(UpdateReviewRequest $request, Review $review)
     {
-        //
+        $data = $request->validated();
+        $review->update($data);
+        return response()->json(['success' => true], 201);
     }
 
     /**
