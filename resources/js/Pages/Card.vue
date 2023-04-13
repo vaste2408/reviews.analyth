@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import {onMounted, reactive} from "vue";
 import Review from "@/Pages/Reviews/Components/review.vue";
+import NavBar from "@/Components/NavBar.vue";
 
 const props = defineProps({
     postamat: {
@@ -35,24 +36,38 @@ onMounted(async () => {
 
 <template>
     <Head title="Postamat Card" />
-
+    <NavBar :links="[{route: 'welcome', name: 'Main'}]" />
     <div class="row q-pa-md justify-center bg-gray-100">
-        <div class="col-8 row bg-white">
-            <div class="col-8 q-ma-md">
+        <div class="col-8 row bg-white justify-between">
+            <div class="col-8 q-ma-md q-pa-md">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="props.postamat">{{props.postamat.name}}</h2>
+                <div class="flex no-wrap items-center">
+                    <q-rating
+                        v-model="props.postamat.rating"
+                        :title="props.postamat.rating"
+                        readonly
+                        size="2em"
+                        color="orange-5"
+                        icon="star_border"
+                        icon-selected="star"
+                    />
+                    <span class="text-gray-600 q-ml-sm text-subtitle1">{{props.postamat.rating}} ({{ data.reviews.length }})</span>
+                </div>
                 <div>
                     <q-carousel
                         v-model="data.slide"
                         vertical
                         swipeable
                         animated
+                        transition-prev="slide-down"
+                        transition-next="slide-up"
                         :arrows="true"
                         :navigation="false"
-                        height="230px"
                         class="bg-white rounded-borders"
                         control-color="black"
+                        height="auto"
                     >
-                        <q-carousel-slide v-for="(review, ind) in data.reviews" :key="review.id" :name="'review'+ind" class="column no-wrap flex-center">
+                        <q-carousel-slide v-for="(review, ind) in data.reviews" :key="review.id" :name="'review'+ind" class="column no-wrap flex-center q-px-sm">
                             <div class="text-left w-full">
                                 <Review :review="review" />
                             </div>

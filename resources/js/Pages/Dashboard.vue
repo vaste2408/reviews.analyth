@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import {onMounted, reactive} from "vue";
 import PieChart from '@/components/PieChart.vue';
+import NavBar from "@/Components/NavBar.vue";
 
 const props = defineProps({
     postamat: {
@@ -98,7 +99,7 @@ const colors = ['red', 'lightgray', '#21BA45'];
 
 <template>
     <Head title="Dashboard" />
-
+    <NavBar v-if="!props.postamat" :links="[{route: 'welcome', name: 'Main'}]" />
     <div class="w-full p-5">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="data.postamat">{{data.postamat.name}}</h2>
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Аналитика отзывов</h2>
