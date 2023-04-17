@@ -8,6 +8,7 @@ import {onMounted, reactive, ref} from "vue";
 import LoadableSelect from '@/components/LoadableSelect.vue'
 import Dashboard from "@/Pages/Dashboard.vue";
 import Review from "@/Pages/Reviews/Components/review.vue";
+import CreateReview from "@/Pages/Reviews/Components/CreateReview.vue";
 
 defineProps({
     canLogin: {
@@ -200,35 +201,14 @@ function hidePostamatBalloon() {
 
 //форма написания отзыва
 const showNewReviewDialog = ref(false);
-const newReviewRating = ref(3);
-const newReviewText = ref('');
-const newReviewFio = ref('');
-function onResetReviewForm() {
-    newReviewRating.value = 3;
-    newReviewText.value = '';
-    newReviewFio.value = '';
-}
-function onSubmitReviewForm() {
-    axios.post(route('api.reviews.create'), {
-        postamat_id: data.current_postamat.id,
-        text: newReviewText.value,
-        user_fio: newReviewFio.value,
-        score: newReviewRating.value
-    })
-    .then(function (response) {
-        if (response.data.success) {
-            hidePostamatBalloon();
-            hideNewReviewDialog();
-            hideAnalythicDialog();
-            loadPostamats();
-        }
-    })
-    .catch(function (error) {
-        console.log(error);
-    });
-}
-function hideNewReviewDialog() {
+function onCloseReviewDialog() {
     showNewReviewDialog.value = false;
+}
+function onSaveReviewDialog() {
+    onCloseReviewDialog();
+    hidePostamatBalloon();
+    hideAnalythicDialog();
+    loadPostamats();
 }
 
 //форма аналитики
@@ -248,7 +228,7 @@ onMounted(async () => {
     <Head title="Main" />
 
     <div
-        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
+        class="relative sm:flex sm:justify-center min-h-screen bg-center dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
     >
         <div v-if="canLogin" class="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
             <Link
@@ -274,7 +254,7 @@ onMounted(async () => {
             </template>
         </div>
 
-        <div class="w-full">
+        <div class="w-full q-mt-xl">
             <div class="filters__section w-full sm:flex sm:justify-start px-2">
                 <div class="w-1/6">
                     <q-field outlined label="Рейтинг" stack-label>
@@ -324,15 +304,13 @@ onMounted(async () => {
                     :settings="data.settings"
                     :region="data.bounds"
                     :events="data.events"
-                    style="height: 600px"
+                    style="height: 700px"
                     @created="onMapCreated"
                     @boundschange="onBoundsChanged"
                     @sizechange="onBoundsChanged"
                     @balloonopen="onBalloonOpened"
                 >
                 </YandexMap>
-                <p>count: {{data.postamats.length}}</p>
-                <p>filtered: {{data.filtered.length}}</p>
             </div>
             <!--КАРТОЧКА ПОСТАМАТА-->
             <q-dialog v-model="data.showPostamatBalloon"
@@ -380,37 +358,7 @@ onMounted(async () => {
                 </q-card>
             </q-dialog>
             <!--КАРТОЧКА СОЗДАНИЯ ОТЗЫВА-->
-            <q-dialog v-model="showNewReviewDialog">
-                <q-card class="w-3/4">
-                    <q-card-section>
-                        <q-form
-                            @submit.prevent="onSubmitReviewForm"
-                            @reset="onResetReviewForm"
-                        >
-                            <div class="q-gutter-y-md column">
-                                <q-rating
-                                    v-model="newReviewRating"
-                                    size="3em"
-                                    color="orange-5"
-                                    icon="star_border"
-                                    icon-selected="star"
-                                />
-                            </div>
-                            <q-input name="user_fio" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
-                                     :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
-                            />
-                            <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
-                                     type="textarea"
-                                     lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, напишите что-нибудь']"
-                            />
-                            <div class="mt-2">
-                                <q-btn label="Сохранить" type="submit" color="primary"/>
-                                <q-btn label="Отмена" type="reset" color="primary" flat class="q-ml-sm" />
-                            </div>
-                        </q-form>
-                    </q-card-section>
-                </q-card>
-            </q-dialog>
+            <CreateReview v-model="showNewReviewDialog" :postamat="data.current_postamat" @save="onSaveReviewDialog" @close="onCloseReviewDialog" />
             <!--КАРТОЧКА АНАЛИТИКИ-->
             <q-dialog v-model="showAnalythicDialog" full-width full-height>
                 <q-card>

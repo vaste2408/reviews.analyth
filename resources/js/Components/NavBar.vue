@@ -1,5 +1,5 @@
 <template>
-    <div class="relative w-full">
+    <div class="relative w-full q-pa-md">
         <NavLink v-for="link in props.links" :key="link" :href="route(link.route)" :active="route().current(link.route)">
             {{link.name}}
         </NavLink>

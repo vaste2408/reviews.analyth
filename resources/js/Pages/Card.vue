@@ -1,8 +1,9 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import Review from "@/Pages/Reviews/Components/review.vue";
 import NavBar from "@/Components/NavBar.vue";
+import CreateReview from "@/Pages/Reviews/Components/CreateReview.vue";
 
 const props = defineProps({
     postamat: {
@@ -26,6 +27,16 @@ function loadReviews() {
             data.reviews_loading = false;
         });
     });
+}
+
+//форма написания отзыва
+const showNewReviewDialog = ref(false);
+function onCloseReviewDialog() {
+    showNewReviewDialog.value = false;
+}
+function onSaveReviewDialog() {
+    onCloseReviewDialog();
+    loadReviews();
 }
 
 onMounted(async () => {
@@ -52,6 +63,7 @@ onMounted(async () => {
                         icon-selected="star"
                     />
                     <span class="text-gray-600 q-ml-sm text-subtitle1">{{props.postamat.rating}} ({{ data.reviews.length }})</span>
+                    <q-btn class="ml-4" label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
                 </div>
                 <div>
                     <q-carousel
@@ -107,4 +119,5 @@ onMounted(async () => {
             </div>
         </div>
     </div>
+    <CreateReview v-model="showNewReviewDialog" :postamat="data.postamat" @save="onSaveReviewDialog" @close="onCloseReviewDialog" />
 </template>

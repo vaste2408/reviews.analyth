@@ -17,7 +17,8 @@ class Review extends Model
         'user_id',
         'user_fio',
         'text',
-        'score'
+        'score',
+        'confirmed'
     ];
 
     public function postamat() : BelongsTo {
