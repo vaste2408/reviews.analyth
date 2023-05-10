@@ -1,8 +1,8 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import {onMounted, reactive, ref} from "vue";
-import Review from "@/Pages/Reviews/Components/review.vue";
 import NavBar from "@/Components/NavBar.vue";
+import Review from "@/Pages/Reviews/Components/review.vue";
 import CreateReview from "@/Pages/Reviews/Components/CreateReview.vue";
 
 const props = defineProps({
@@ -52,7 +52,7 @@ onMounted(async () => {
         <div class="col-8 row bg-white justify-between">
             <div class="col-8 q-ma-md q-pa-md">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="props.postamat">{{props.postamat.name}}</h2>
-                <div class="flex no-wrap items-center">
+                <div class="flex no-wrap items-center q-mt-sm">
                     <q-rating
                         v-model="props.postamat.rating"
                         :title="props.postamat.rating"
@@ -119,5 +119,9 @@ onMounted(async () => {
             </div>
         </div>
     </div>
-    <CreateReview v-model="showNewReviewDialog" :postamat="data.postamat" @save="onSaveReviewDialog" @close="onCloseReviewDialog" />
+    <CreateReview v-model="showNewReviewDialog"
+                  :postamat="data.postamat"
+                  @save="onSaveReviewDialog"
+                  @close="onCloseReviewDialog"
+    />
 </template>

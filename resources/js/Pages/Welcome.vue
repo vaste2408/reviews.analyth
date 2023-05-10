@@ -5,7 +5,7 @@
 import {Head, Link} from '@inertiajs/vue3';
 import {loadYmap, YandexMap} from 'vue-yandex-maps';
 import {onMounted, reactive, ref} from "vue";
-import LoadableSelect from '@/components/LoadableSelect.vue'
+import LoadableSelect from '@/Components/LoadableSelect.vue';
 import Dashboard from "@/Pages/Dashboard.vue";
 import Review from "@/Pages/Reviews/Components/review.vue";
 import CreateReview from "@/Pages/Reviews/Components/CreateReview.vue";
@@ -362,7 +362,9 @@ onMounted(async () => {
             <!--КАРТОЧКА АНАЛИТИКИ-->
             <q-dialog v-model="showAnalythicDialog" full-width full-height>
                 <q-card>
-                    <q-card-section class="row items-center q-pb-none">
+                    <q-card-section class="row items-center text-center bg-gray-100">
+                        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-if="data.current_postamat">{{data.current_postamat.name}}</h2>
+                        <h2 class="text-xl text-gray-500 dark:text-gray-200 leading-tight ml-3" v-if="data.current_postamat">ID: {{data.current_postamat.id}}</h2>
                         <q-space />
                         <q-btn icon="close" flat round dense v-close-popup />
                     </q-card-section>

@@ -89,18 +89,19 @@ onMounted(async () => {
 });
 
 const chart_data = [
-    { label: 'Negative', value: 5 },
-    { label: 'Neutral', value: 20 },
+    { label: 'Negative', value: 20 },
+    { label: 'Neutral', value: 5 },
     { label: 'Positive', value: 75 },
 ];
 const labels = ['label', 'value'];
-const colors = ['red', '#ffc700', '#21BA45'];
+const colors = ['red', 'lightgray', '#21BA45'];
 </script>
 
 <template>
     <Head title="Dashboard" />
     <NavBar v-if="!props.postamat" :links="[{route: 'welcome', name: 'Main'}]" />
     <div class="w-full p-5">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight mb-5" v-if="data.postamat">{{data.postamat.name}}</h2>
         <div class="filters__section w-full sm:flex sm:justify-start mt-2" v-show="!postamat">
             <div class="w-1/6">
                 <q-select v-model="data.postamat" label="Постамат" clearable outlined

@@ -21,7 +21,7 @@ class Controller extends BaseController
     }
 
     public function dashboard(Postamat $postamat = null) {
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Dashboard copy', [
             'postamat' => $postamat
         ]);
     }

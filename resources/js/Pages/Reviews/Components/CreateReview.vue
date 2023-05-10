@@ -38,13 +38,17 @@ import {ref} from "vue";
 const props = defineProps({
     postamat: {
         type: Object,
-        required: true
+        required: true,
+    },
+    user: {
+        type: Object,
+        default: null,
     },
 });
 const emit = defineEmits(['open', 'close', 'save']);
 const newReviewRating = ref(3);
 const newReviewText = ref('');
-const newReviewFio = ref('');
+const newReviewFio = ref(props.user ? props.user.fio : '');
 function onResetReviewForm() {
     newReviewRating.value = 3;
     newReviewText.value = '';

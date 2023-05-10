@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h5 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight" v-html="title"></h5>
+        <h5 class="text-gray-600 dark:text-gray-200 leading-tight text-center" v-html="title"></h5>
         <Chart
             :size="size"
             :data="data"
@@ -11,13 +11,14 @@
             <template #layers>
                 <Pie
                     :dataKeys="labels"
-                    :pie-style="{ padAngle: 0.01, colors: colors }" />
+                    :pie-style="{ padAngle: 0, colors: colors, innerRadius: 80, }" />
             </template>
         </Chart>
     </div>
 </template>
 
 <script setup>
+//https://vue3charts.org/docs/charts/pie
 import { Chart, Pie } from 'vue3-charts'
 
 const props = defineProps({
@@ -39,15 +40,15 @@ const props = defineProps({
     },
     size: {
         type: Object,
-        default: { width: 200, height: 200 }
+        default: { width: 250, height: 250 }
     },
     margin: {
         type: Object,
         default: {
-            left: 0,
+            left: 20,
             top: 20,
             right: 20,
-            bottom: 0
+            bottom: 20
         }
     },
     axis: {
@@ -60,7 +61,7 @@ const props = defineProps({
                 hide: true,
             },
         }
-    }
+    },
 });
 
 const direction = 'circular';
