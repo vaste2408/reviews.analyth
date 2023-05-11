@@ -20,6 +20,7 @@
                     />
                     <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
                              type="textarea"
+                             class="mt-4"
                              lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, напишите что-нибудь']"
                     />
                     <div class="mt-2">
@@ -33,22 +34,19 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import {usePage} from '@inertiajs/vue3';
 
 const props = defineProps({
     postamat: {
         type: Object,
         required: true,
     },
-    user: {
-        type: Object,
-        default: null,
-    },
 });
 const emit = defineEmits(['open', 'close', 'save']);
 const newReviewRating = ref(3);
 const newReviewText = ref('');
-const newReviewFio = ref(props.user ? props.user.fio : '');
+const newReviewFio = ref('');
 function onResetReviewForm() {
     newReviewRating.value = 3;
     newReviewText.value = '';
@@ -71,6 +69,9 @@ function onSubmitReviewForm() {
         console.log(error);
     });
 }
+onMounted(async () => {
+    newReviewFio.value = usePage().props.auth.user?.name;
+});
 </script>
 
 <style scoped>

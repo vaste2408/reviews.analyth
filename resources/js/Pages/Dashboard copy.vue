@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import {onMounted, reactive} from "vue";
 import NavBar from "@/Components/NavBar.vue";
 import PieChart from '@/Components/PieChart.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
     postamat: {
@@ -89,86 +90,86 @@ onMounted(async () => {
 });
 
 const chart_data = [
-    { label: 'Negative', value: 20 },
-    { label: 'Neutral', value: 5 },
+    { label: 'Negative', value: 5 },
+    { label: 'Neutral', value: 20 },
     { label: 'Positive', value: 75 },
 ];
 const labels = ['label', 'value'];
-const colors = ['red', 'lightgray', '#21BA45'];
+const colors = ['red', '#ffc700', '#21BA45'];
 </script>
 
 <template>
     <Head title="Dashboard" />
-    <NavBar v-if="!props.postamat" :links="[{route: 'welcome', name: 'Main'}]" />
-    <div class="w-full p-5">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight mb-5" v-if="data.postamat">{{data.postamat.name}}</h2>
-        <div class="filters__section w-full sm:flex sm:justify-start mt-2" v-show="!postamat">
-            <div class="w-1/6">
-                <q-select v-model="data.postamat" label="Постамат" clearable outlined
-                          :options="data.postamat_options"
-                          option-label="name"
-                          option-value="id"
-                          use-input fill-input input-debounce="0"
-                          hide-selected
-                          @filter="postamatsFilter"
-                          @update:model-value="loadReviews"
-                ></q-select>
+    <AuthenticatedLayout>
+        <div class="w-full p-8 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+            <div class="filters__section w-full sm:flex sm:justify-start mb-4" v-show="!postamat">
+                <div class="w-1/6">
+                    <q-select v-model="data.postamat" label="Постамат" clearable outlined
+                            :options="data.postamat_options"
+                            option-label="name"
+                            option-value="id"
+                            use-input fill-input input-debounce="0"
+                            hide-selected
+                            @filter="postamatsFilter"
+                            @update:model-value="loadReviews"
+                    ></q-select>
+                </div>
+            </div>
+            <h5>Аналитика отзывов</h5>
+            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
+            </div>
+            <h5>О партнёрах</h5>
+            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
+            </div>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Модерация отзывов</h2>
+            <div class="w-full mt-4">
+                <q-table
+                    flat bordered
+                    title="Отзывы"
+                    no-data-label="Нет отзывов"
+                    row-key="id"
+                    :loading="data.reviews_loading"
+                    :rows="data.reviews"
+                    :columns="data.reviews_columns"
+                    :pagination="data.reviews_pagination"
+                    :rows-per-page-label="'Показывать по '"
+                    :filter="data.reviews_search"
+                >
+                    <template v-slot:top-right>
+                        <q-input borderless dense debounce="300" v-model="data.reviews_search" placeholder="Поиск">
+                            <template v-slot:append>
+                                <q-icon name="search" />
+                            </template>
+                        </q-input>
+                    </template>
+                    <template v-slot:body="props">
+                        <q-tr :props="props">
+                            <q-td v-for="column in data.reviews_columns" :key="column.name" :props="props">
+                                <template v-if="column.name === 'buttons'">
+                                    <q-btn outline round color="green" size="sm" icon="check"
+                                        class="q-mr-sm"
+                                        @click="confirmReview(props.row)"
+                                        title="Подтвердить" />
+                                    <q-btn outline round color="primary" size="sm" icon="search"
+                                        class="q-mr-sm"
+                                        @click="analythReview(props.row)"
+                                        title="Исследовать" />
+                                </template>
+                                <template v-else>
+                                    {{column.field(props.row)}}
+                                </template>
+                            </q-td>
+                        </q-tr>
+                    </template>
+                </q-table>
             </div>
         </div>
-        <h5>Аналитика отзывов</h5>
-        <div class="w-full mt-4 flex justify-evenly border-b mb-5 pb-3">
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
-        </div>
-        <h5>О партнёрах</h5>
-        <div class="w-full mt-4 flex justify-evenly border-b mb-5 pb-3">
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
-            <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
-        </div>
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Модерация отзывов</h2>
-        <div class="w-full mt-2">
-            <q-table
-                flat bordered
-                title="Отзывы"
-                no-data-label="Нет отзывов"
-                row-key="id"
-                :loading="data.reviews_loading"
-                :rows="data.reviews"
-                :columns="data.reviews_columns"
-                :pagination="data.reviews_pagination"
-                :rows-per-page-label="'Показывать по '"
-                :filter="data.reviews_search"
-            >
-                <template v-slot:top-right>
-                    <q-input borderless dense debounce="300" v-model="data.reviews_search" placeholder="Поиск">
-                        <template v-slot:append>
-                            <q-icon name="search" />
-                        </template>
-                    </q-input>
-                </template>
-                <template v-slot:body="props">
-                    <q-tr :props="props">
-                        <q-td v-for="column in data.reviews_columns" :key="column.name" :props="props">
-                            <template v-if="column.name === 'buttons'">
-                                <q-btn outline round color="green" size="sm" icon="check"
-                                       class="q-mr-sm"
-                                       @click="confirmReview(props.row)"
-                                       title="Подтвердить" />
-                                <q-btn outline round color="primary" size="sm" icon="search"
-                                       class="q-mr-sm"
-                                       @click="analythReview(props.row)"
-                                       title="Исследовать" />
-                            </template>
-                            <template v-else>
-                                {{column.field(props.row)}}
-                            </template>
-                        </q-td>
-                    </q-tr>
-                </template>
-            </q-table>
-        </div>
-    </div>
+    </AuthenticatedLayout>
 </template>

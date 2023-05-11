@@ -346,7 +346,7 @@ onMounted(async () => {
                                 <a :href="route('postamat.info', data.current_postamat)" target="_blank" class="text-primary">Перейти к отзывам</a>
                             </div>
                         </q-card-section>
-                        <q-card-section>
+                        <q-card-section v-if="$page.props.auth.user">
                             <q-btn label="Аналитика" @click="showAnalythicDialog=true"></q-btn>
                         </q-card-section>
                     </template>
