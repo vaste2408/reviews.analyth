@@ -79,8 +79,31 @@ function confirmReview(review) {
         console.log(error);
     });
 }
+
 function analythReview(review) {
     alert(review.id);
+}
+
+function exportXLS () {
+    axios({
+        url: data.postamat ? route('api.excel.dashboard.postamat', data.postamat) : route('api.excel.dashboard'),
+        data: {
+            postamat: data.postamat,
+        },
+        method: 'POST',
+        responseType: 'blob',
+    }).then((response) => {
+        let fileName = response.headers["content-disposition"].split("filename=")[1];
+        const href = URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = href;
+        link.setAttribute('download', fileName);
+        link.click();
+        URL.revokeObjectURL(href);
+    }).catch(error => {
+        alert('Что-то пошло не так');
+        console.log(error);
+    });
 }
 
 onMounted(async () => {
@@ -115,7 +138,7 @@ const colors = ['red', '#ffc700', '#21BA45'];
                     ></q-select>
                 </div>
             </div>
-            <h5>Аналитика отзывов</h5>
+            <h5>Аналитика отзывов <q-btn color="primary" label="Export xls" @click="exportXLS" /></h5>
             <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
@@ -123,12 +146,12 @@ const colors = ['red', '#ffc700', '#21BA45'];
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
             </div>
             <h5>О партнёрах</h5>
-            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
+            <div class="w-full mt-4 flex justify-evenly mb-4">
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
             </div>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Модерация отзывов</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Модерация отзывов</h2>
             <div class="w-full mt-4">
                 <q-table
                     flat bordered

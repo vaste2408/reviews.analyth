@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\PostamatController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ExcelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,3 +36,5 @@ Route::get('postamat/{postamat}/reviews', [ReviewController::class, 'index'])->n
 Route::get('reviews', [ReviewController::class, 'index'])->name('api.reviews'); //все отзывы
 Route::post('reviews', [ReviewController::class, 'store'])->name('api.reviews.create');
 Route::post('reviews/{review}', [ReviewController::class, 'update'])->name('api.reviews.update');
+Route::post('excel/dashboard', [ExcelController::class, 'dashboard_xls'])->name('api.excel.dashboard'); //экспортим аналитику в эксель
+Route::post('excel/dashboard/{postamat}', [ExcelController::class, 'dashboard_xls'])->name('api.excel.dashboard.postamat'); //экспортим аналитику в эксель
