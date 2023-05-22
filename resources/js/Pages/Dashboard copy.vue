@@ -68,8 +68,9 @@ function loadPostamats() {
 function loadReviews() {
     data.reviews_loading = true;
     fetch(data.postamat ? route('api.postamat.reviews', data.postamat.id) : route('api.reviews')).then(r => {
-        r.json().then(val => {
-            data.reviews = val;
+        r.json().then(answer => {
+            console.log(answer);
+            data.reviews = answer;
             data.reviews_loading = false;
         });
     }).catch(error => {
@@ -156,20 +157,8 @@ const colors = ['red', '#ffc700', '#21BA45'];
                     ></q-select>
                 </div>
             </div>
-            <h5>Аналитика отзывов <q-btn color="primary" label="Export xls" @click="exportXLS" /></h5>
-            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
-            </div>
-            <h5>О партнёрах</h5>
-            <div class="w-full mt-4 flex justify-evenly mb-4">
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
-            </div>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Модерация отзывов</h2>
+            <q-btn color="primary" label="Export xls" @click="exportXLS" />
             <div class="w-full mt-4">
                 <q-table
                     flat bordered
@@ -210,6 +199,19 @@ const colors = ['red', '#ffc700', '#21BA45'];
                         </q-tr>
                     </template>
                 </q-table>
+            </div>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Аналитика отзывов </h2>
+            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
+            </div>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">О партнёрах</h2>
+            <div class="w-full mt-4 flex justify-evenly mb-4">
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
+                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
             </div>
         </div>
     </AuthenticatedLayout>

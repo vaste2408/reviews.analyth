@@ -21,7 +21,7 @@ class Review extends Model
         'text',
         'score',
         'confirmed',
-        'theme_id',
+        'thematic_id',
         'source_id',
         'need_reaction'
     ];
