@@ -21,13 +21,21 @@ const data = reactive({
     reviews_loading: true,
     reviews_search: '',
     reviews_columns: [
-        {name: 'postamat', required: false, label: 'Постамат', align: 'left', field: row => row.postamat.name, format: val => `${val}`, sortable: true},
-        {name: 'address', required: false, label: 'Адрес', align: 'left', field: row => row.postamat.address, format: val => `${val}`, sortable: true},
-        {name: 'score', required: true, label: 'Оценка', align: 'left', field: row => row.score, format: val => `${val}`, sortable: true},
+        {name: 'number', required: false, label: 'Номер', align: 'left', field: row => row.id, format: val => `${val}`, sortable: true},
+        {name: 'source', required: false, label: 'Источник', align: 'left', field: row => row.source?.name, format: val => `${val}`, sortable: true},
+        {name: 'category', required: false, label: 'Категория', align: 'left', field: row => row.theme?.name, format: val => `${val}`, sortable: true},
+        {name: 'theme', required: false, label: 'Тематика', align: 'left', field: row => row.thematic?.name, format: val => `${val}`, sortable: true},
+        {name: 'fio', required: false, label: 'ФИО', align: 'left', field: row => row.user_fio, format: val => `${val}`, sortable: true},
+        {name: 'phone', required: false, label: 'Телефон', align: 'left', field: row => row.user_phone, format: val => `${val}`, sortable: true},
         {name: 'text', required: false, label: 'Текст', align: 'left', field: row => row.text, format: val => `${val}`},
-        {name: 'confirmed', required: true, label: 'Подтверждено', align: 'left', field: row => row.confirmed, format: val => `${val}`},
-        {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion, format: val => `${val}`, sortable: true},
-        {name: 'category', required: false, label: 'Категория', align: 'left', field: row => row.category, format: val => `${val}`, sortable: true},
+        {name: 'score', required: true, label: 'Оценка', align: 'left', field: row => row.score, format: val => `${val}`, sortable: true},
+        {name: 'marketplace', required: false, label: 'Маркетплейс', align: 'left', field: row => row.marketplace?.name, format: val => `${val}`, sortable: true},
+        {name: 'postamat', required: false, label: 'Постамат', align: 'left', field: row => row.postamat?.name, format: val => `${val}`, sortable: true},
+        {name: 'address', required: false, label: 'Адрес', align: 'left', field: row => row.postamat?.address, format: val => `${val}`, sortable: true},
+        {name: 'confirmed', required: true, label: 'Одобрено', align: 'left', field: row => row.confirmed, format: val => `${val}`},
+        {name: 'reaction', required: true, label: 'Требует устранения', align: 'left', field: row => row.need_reaction, format: val => `${val}`},
+        {name: 'closed', required: true, label: 'Устранено', align: 'left', field: row => row.closed, format: val => `${val}`},
+        {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion?.name, format: val => `${val}`, sortable: true},
         {name: 'influ_cat', required: false, label: 'Влияние на категорию', align: 'left', field: row => row.influ_cat, format: val => `${val}`, sortable: true},
         {name: 'influ_post', required: false, label: 'Влияние на постамат', align: 'left', field: row => row.influ_post, format: val => `${val}`, sortable: true},
         {name: 'buttons', required: false, label: '', align: 'right', field: row => row.id, sortable: false},
@@ -64,6 +72,9 @@ function loadReviews() {
             data.reviews = val;
             data.reviews_loading = false;
         });
+    }).catch(error => {
+        alert('Что-то пошло не так');
+        console.log(error);
     });
 }
 
@@ -81,7 +92,14 @@ function confirmReview(review) {
 }
 
 function analythReview(review) {
-    alert(review.id);
+    axios.post(route('api.reviews.process', review), {})
+    .then(function (response) {
+        //TODO бработка результата
+    })
+    .catch(function (error) {
+        alert('Что-то пошло не так');
+        console.log(error);
+    });
 }
 
 function exportXLS () {

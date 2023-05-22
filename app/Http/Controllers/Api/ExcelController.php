@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Marketplace;
 use App\Models\Postamat;
 use App\Models\Review;
-use App\Services\PostamatService;
+use App\Services\ReviewsService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -98,27 +99,49 @@ class ExcelController extends Controller
         return $chart1;
     }
 
-    public function dashboard_xls(Postamat $postamat = null) {
+    public function dashboard_postamat(Postamat $postamat) {
+        $this->dashboard_xls($postamat);
+    }
+
+    public function dashboard_marketplace(Marketplace $marketplace) {
+        $this->dashboard_xls(null, $marketplace);
+    }
+
+    public function dashboard_xls(Postamat $postamat = null, Marketplace $marketplace = null) {
+        $reviews = null;
+        $reviews = $postamat ? ReviewsService::byPostamatFull($postamat) : null;
+        $reviews = $marketplace ? ReviewsService::byMarketplaceFull($marketplace) : null;
+        if (!$reviews) {
+            $reviews = ReviewsService::full();
+        }
+
         //php artisan storage:link предварительно
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
         $sheet = $this->createSheet($spreadsheet, 'Все отзывы');
-        $reviews = $postamat ? $postamat->reviews()->with('postamat')->get() : PostamatService::ReviewsFull();
 
         $table = [
-            ['id', 'postamat', 'score', 'text', 'created', 'user', 'approved', 'category', 'characteristic']
+            ['Номер', 'Источник', 'Маркетплейс', 'Постамат', 'Адрес', 'Оценка', 'Текст', 'Создано', 'ФИО', 'Телефон', 'Подветрждено',
+            'Требуется устранение', 'Устранено', 'Тема', 'Тематика', 'Характер']
         ];
         foreach ($reviews as $review) {
             $table[] = [
                 $review->id,
-                $review->postamat->name,
+                $review->source?->name,
+                $review->marketplace?->name,
+                $review->postamat?->name,
+                $review->postamat?->address,
                 $review->score,
                 $review->text,
                 $review->created_at,
                 $review->user_fio,
+                $review->userphone,
                 $review->confirmed,
-                'Категория',
-                $review->characteristic,
+                $review->need_reaction,
+                $review->closed,
+                $review->theme?->name,
+                $review->thematic?->name,
+                $review->emotion?->name,
             ];
         }
 
@@ -176,8 +199,13 @@ class ExcelController extends Controller
                 })->count(),
             ]
         ];
-        $sheet->setCellValue('A1', $postamat?->name);
-        $sheet->fromArray($table, null, $postamat ? 'A2' : 'A1');
+        if ($postamat) {
+            $sheet->setCellValue('A1', $postamat?->name);
+        }
+        if ($marketplace) {
+            $sheet->setCellValue('A1', $marketplace?->name);
+        }
+        $sheet->fromArray($table, null, $postamat || $marketplace ? 'A2' : 'A1');
 
         $sheet2 = $this->createSheet($spreadsheet, 'Аналитика');
         $sheet2->fromArray($totalTable);

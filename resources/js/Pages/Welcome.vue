@@ -255,8 +255,8 @@ onMounted(async () => {
         </div>
 
         <div class="w-full q-mt-xl">
-            <div class="filters__section w-full sm:flex sm:justify-start px-2">
-                <div class="w-1/6">
+            <div class="filters__section w-full row sm:justify-start px-2">
+                <div class="col-sm-2 col-xs-12 q-mr-sm">
                     <q-field outlined label="Рейтинг" stack-label>
                         <template v-slot:control>
                             <div class="self-center full-width no-outline pl-1 pr-1" tabindex="0">
@@ -272,15 +272,7 @@ onMounted(async () => {
                         </template>
                     </q-field>
                 </div>
-                <div class="w-1/6 ml-2">
-                    <LoadableSelect
-                        clearable outlined emit-value map-options
-                        :url="route('api.categories')"
-                        v-model="data.selected_filters.category"
-                        @update:model-value="loadPostamats"
-                        label="Категория"></LoadableSelect>
-                </div>
-                <div class="w-1/6 ml-2">
+                <div class="col-sm-2 col-xs-12 q-mr-sm">
                     <LoadableSelect
                         clearable outlined emit-value map-options
                         :url="route('api.with_reviews')"
@@ -288,7 +280,15 @@ onMounted(async () => {
                         @update:model-value="loadPostamats"
                         label="По наличию отзывов"></LoadableSelect>
                 </div>
-                <div class="w-1/6 ml-2">
+                <div class="col-sm-2 col-xs-12 q-mr-sm">
+                    <LoadableSelect
+                        clearable outlined emit-value map-options
+                        :url="route('api.categories')"
+                        v-model="data.selected_filters.category"
+                        @update:model-value="loadPostamats"
+                        label="Категория отзывов"></LoadableSelect>
+                </div>
+                <div class="col-sm-2 col-xs-12">
                     <LoadableSelect
                         clearable outlined emit-value map-options
                         :url="route('api.type_reviews')"
@@ -322,7 +322,7 @@ onMounted(async () => {
                         <div class="text-subtitle2">{{data.current_postamat.address}}</div>
                     </q-card-section>
                     <q-card-section class="q-pt-none">
-                        <div class="flex no-wrap items-center">
+                        <div class="sm:flex no-wrap items-center">
                             <q-rating
                                 v-model="data.current_postamat.rating"
                                 :title="data.current_postamat.rating"
@@ -332,8 +332,8 @@ onMounted(async () => {
                                 icon="star_border"
                                 icon-selected="star"
                             />
-                            <span class="text-gray-600 q-ml-sm text-subtitle1">{{data.current_postamat.rating}} ({{ data.current_postamat.reviews.length }})</span>
-                            <q-btn class="ml-4" label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
+                            <span class="text-gray-600 q-ml-sm text-subtitle1 mr-4">{{data.current_postamat.rating}} ({{ data.current_postamat.reviews.length }})</span>
+                            <q-btn label="Оставить отзыв" color="primary" outline :size="'md'" @click="showNewReviewDialog = true"/>
                         </div>
                     </q-card-section>
                     <template v-if="data.current_postamat.reviews.length">

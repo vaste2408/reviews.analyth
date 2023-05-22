@@ -18,7 +18,10 @@
                     <q-input name="user_fio" v-model="newReviewFio" label="ФИО" hint="Как Вас зовут?" lazy-rules
                              :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
                     />
-                    <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы"
+                    <q-input name="user_phone" v-model="newReviewPhone" label="Телефон" hint="Как Вам позвонить?" lazy-rules
+                             :rules="[ val => val && val.length > 0 || 'Пожалуйста, заполните поле']"
+                    />
+                    <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы, или опишите проблему"
                              type="textarea"
                              class="mt-4"
                              lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, напишите что-нибудь']"
@@ -47,10 +50,12 @@ const emit = defineEmits(['open', 'close', 'save']);
 const newReviewRating = ref(3);
 const newReviewText = ref('');
 const newReviewFio = ref('');
+const newReviewPhone = ref('');
 function onResetReviewForm() {
     newReviewRating.value = 3;
     newReviewText.value = '';
     newReviewFio.value = '';
+    newReviewPhone.value = '';
     emit('close');
 }
 function onSubmitReviewForm() {
@@ -58,6 +63,7 @@ function onSubmitReviewForm() {
         postamat_id: props.postamat.id,
         text: newReviewText.value,
         user_fio: newReviewFio.value,
+        user_phone: newReviewPhone.value,
         score: newReviewRating.value
     })
     .then(function (response) {
@@ -71,6 +77,7 @@ function onSubmitReviewForm() {
 }
 onMounted(async () => {
     newReviewFio.value = usePage().props.auth.user?.name;
+    newReviewPhone.value = usePage().props.auth.user?.phone;
 });
 </script>
 

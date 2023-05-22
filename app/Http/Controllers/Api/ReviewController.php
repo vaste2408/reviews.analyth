@@ -5,26 +5,37 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
+use App\Http\Requests\ProcessReviewRequest;
+use App\Models\Marketplace;
 use App\Models\Postamat;
 use App\Models\Review;
-use App\Services\PostamatService;
+use App\Services\ReviewsService;
+use App\Services\AnalythisService;
 
 class ReviewController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Все отзывы
      */
-    public function index(Postamat $postamat = null)
+    public function index()
     {
-        return $postamat ? $postamat->reviews()->with('postamat')->get() : PostamatService::ReviewsFull();
+        return ReviewsService::full();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Отзывы по постамату
      */
-    public function create()
+    public function postamatReviews(Postamat $postamat)
     {
-        //
+        return ReviewsService::byPostamatFull($postamat);
+    }
+
+    /**
+     * Отзывы по маркетплейсу
+     */
+    public function marketplaceReviews(Marketplace $marketplace)
+    {
+        return ReviewsService::byMarketplaceFull($marketplace);
     }
 
     /**
@@ -38,22 +49,6 @@ class ReviewController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Review $review)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Review $review)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateReviewRequest $request, Review $review)
@@ -64,10 +59,20 @@ class ReviewController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Анализ текста
      */
-    public function destroy(Review $review)
-    {
-        //
+    public function process(ProcessReviewRequest $request) {
+        $data = $request->validated();
+        $result = AnalythisService::analyseText($data['text']);
+        return response()->json($result, 200);
+    }
+
+    /**
+     * Анализ отзыва
+     */
+    public function processReview(Review $review) {
+        $result = AnalythisService::analyseText($review->text);
+        //TODO обработка результата
+        return response()->json($result, 200);
     }
 }

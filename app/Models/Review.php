@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Review extends Model
 {
     use HasFactory;
+    use \Znck\Eloquent\Traits\BelongsToThrough;
 
     protected $table = 'reviews';
 
@@ -16,9 +17,13 @@ class Review extends Model
         'postamat_id',
         'user_id',
         'user_fio',
+        'user_phone',
         'text',
         'score',
-        'confirmed'
+        'confirmed',
+        'theme_id',
+        'source_id',
+        'need_reaction'
     ];
 
     public function postamat() : BelongsTo {
@@ -29,32 +34,38 @@ class Review extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getCharacteristicAttribute()
-    {
-        if ($this->score > 3)
-            return 'Положительный';
-        if ($this->score < 3)
-            return 'Негативный';
-        return 'Нейтральный';
+    public function thematic() : BelongsTo {
+        return $this->belongsTo(Thematic::class);
+    }
+
+    public function source() : BelongsTo {
+        return $this->belongsTo(Source::class);
+    }
+
+    public function marketplace() : BelongsTo {
+        return $this->belongsTo(Marketplace::class);
+    }
+
+    public function theme() {
+        return $this->belongsToThrough(Theme::class, Thematic::class);
+    }
+
+    public function emotion() : BelongsTo {
+        return $this->belongsTo(Emotion::class);
     }
 
     public function getNegativeAttribute()
     {
-        return $this->characteristic === 'Негативный';
+        return $this->emotion_id === -1;
     }
 
     public function getNeutralAttribute()
     {
-        return $this->characteristic === 'Нейтральный';
+        return $this->emotion_id === 0;
     }
 
     public function getPositiveAttribute()
     {
-        return $this->characteristic === 'Положительный';
-    }
-
-    public function getCategoryAttribute()
-    {
-        return 'Общая';
+        return $this->emotion_id === 1;
     }
 }

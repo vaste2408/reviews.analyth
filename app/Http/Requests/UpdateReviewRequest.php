@@ -22,7 +22,14 @@ class UpdateReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirmed' => 'required | bool'
+            'postamat_id' => 'integer', //привязать к постамату
+            'source_id' => 'integer', //привязать к источнику
+            'marketplace_id' => 'integer', //привязать к маркетплейсу
+            'thematic_id' => 'integer', //привязать к тематике
+            'emotion_id' => 'integer', //привязать к характеру
+            'confirmed' => 'bool', //подтверждён
+            'need_reaction' => 'bool', //нужно устранение
+            'closed' => 'bool', //устранено
         ];
     }
 }

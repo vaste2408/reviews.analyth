@@ -43,8 +43,4 @@ class PostamatService {
     public static function Reviews () {
         return Review::all();
     }
-
-    public static function ReviewsFull () {
-        return Review::with('postamat')->with('user')->get();
-    }
 }
