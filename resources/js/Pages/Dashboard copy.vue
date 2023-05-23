@@ -10,12 +10,19 @@ const props = defineProps({
         type: Object,
         default: null
     },
+    marketplace: {
+        type: Object,
+        default: null
+    },
 });
 
 const data = reactive({
     postamats: [], //data from server
     postamat_options: [], //options for select
     postamat: null,
+    marketplaces: [], //data from server
+    marketplace_options: [], //options for select
+    marketplace: null,
     //https://quasar.dev/vue-components/table
     reviews: [],
     reviews_loading: true,
@@ -56,6 +63,13 @@ function postamatsFilter (val, update, abort) {
     })
 }
 
+function marketplacesFilter (val, update, abort) {
+    update(() => {
+        const needle = val.toLowerCase()
+        data.marketplace_options = data.marketplaces.filter(v => v.name.toLowerCase().indexOf(needle) > -1)
+    })
+}
+
 function loadPostamats() {
     fetch(`/api/postamats`).then(r => {
         r.json().then(val => {
@@ -65,9 +79,20 @@ function loadPostamats() {
     });
 }
 
+function loadMarketplaces() {
+    fetch(`/api/marketplaces`).then(r => {
+        r.json().then(val => {
+            data.marketplaces = val;
+            data.marketplace_options = val;
+        });
+    });
+}
+
 function loadReviews() {
     data.reviews_loading = true;
-    fetch(data.postamat ? route('api.postamat.reviews', data.postamat.id) : route('api.reviews')).then(r => {
+    fetch(data.postamat ? route('api.postamat.reviews', data.postamat)
+        : (data.marketplace ? route('api.marketplace.reviews', data.marketplace)
+            : route('api.reviews'))).then(r => {
         r.json().then(answer => {
             console.log(answer);
             data.reviews = answer;
@@ -105,9 +130,13 @@ function analythReview(review) {
 
 function exportXLS () {
     axios({
-        url: data.postamat ? route('api.excel.dashboard.postamat', data.postamat) : route('api.excel.dashboard'),
+        url: data.postamat ? route('api.excel.dashboard.postamat', data.postamat)
+            : (data.marketplace ? route('api.excel.dashboard.marketplace', data.marketplace)
+                : route('api.excel.dashboard')
+            ),
         data: {
             postamat: data.postamat,
+            marketplace: data.marketplace,
         },
         method: 'POST',
         responseType: 'blob',
@@ -128,6 +157,7 @@ function exportXLS () {
 onMounted(async () => {
     data.postamat = props.postamat;
     loadPostamats();
+    loadMarketplaces();
     loadReviews();
 });
 
@@ -144,8 +174,8 @@ const colors = ['red', '#ffc700', '#21BA45'];
     <Head title="Dashboard" />
     <AuthenticatedLayout>
         <div class="w-full p-8 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-            <div class="filters__section w-full sm:flex sm:justify-start mb-4" v-show="!postamat">
-                <div class="w-1/6">
+            <div class="filters__section w-full row sm:justify-start mb-4">
+                <div class="col-xs-12 col-sm-6 col-md-2 me-4" v-show="!postamat">
                     <q-select v-model="data.postamat" label="Постамат" clearable outlined
                             :options="data.postamat_options"
                             option-label="name"
@@ -153,6 +183,17 @@ const colors = ['red', '#ffc700', '#21BA45'];
                             use-input fill-input input-debounce="0"
                             hide-selected
                             @filter="postamatsFilter"
+                            @update:model-value="loadReviews"
+                    ></q-select>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-2" v-show="!marketplace">
+                    <q-select v-model="data.marketplace" label="Маркетплейс" clearable outlined
+                            :options="data.marketplace_options"
+                            option-label="name"
+                            option-value="id"
+                            use-input fill-input input-debounce="0"
+                            hide-selected
+                            @filter="marketplacesFilter"
                             @update:model-value="loadReviews"
                     ></q-select>
                 </div>

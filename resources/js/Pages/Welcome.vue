@@ -23,6 +23,7 @@ let map = null;
 let objectManager = [];
 
 const data = reactive({
+    loading: false,
     settings: { //map settings
         apiKey: "",
         lang: "ru_RU", // Используемый язык
@@ -55,6 +56,7 @@ const data = reactive({
  * АПИ загрузка постаматов. При успехе вызывает showFilteredOnMap
  */
 function loadPostamats() {
+    data.loading = true;
     axios.get(route('map.postamats'), {
         params: {
             bounds: data.bounds,
@@ -68,6 +70,7 @@ function loadPostamats() {
         }
     })
     .then(function (response) {
+        data.loading = false;
         if (response.data) {
             data.postamats = response.data;
             showFilteredOnMap();
@@ -147,8 +150,10 @@ function objectsToJson(objects) {
  * Вывести объекты на карту
  */
 function showFilteredOnMap() {
+    data.loading = true;
     objectManager.removeAll();
     setTimeout(() => {
+        data.loading = false;
         data.filtered = filterByBoundsFunction([...data.postamats]);
         let _json = objectsToJson(data.filtered);
         objectManager.add(_json);
@@ -180,7 +185,9 @@ function onMapCreated(map_obj) {
     });
     map.geoObjects.add(om);
     objectManager = om;
-    loadPostamats();
+    setTimeout(() => {
+        loadPostamats();
+    }, 200);
 }
 
 /**
@@ -311,6 +318,7 @@ onMounted(async () => {
                     @balloonopen="onBalloonOpened"
                 >
                 </YandexMap>
+                <span v-if="data.loading">Загрузка данных...</span>
             </div>
             <!--КАРТОЧКА ПОСТАМАТА-->
             <q-dialog v-model="data.showPostamatBalloon"
@@ -346,7 +354,7 @@ onMounted(async () => {
                                 <a :href="route('postamat.info', data.current_postamat)" target="_blank" class="text-primary">Перейти к отзывам</a>
                             </div>
                         </q-card-section>
-                        <q-card-section v-if="$page.props.auth.user">
+                        <q-card-section v-if="$page.props.auth.user" class="hidden">
                             <q-btn label="Аналитика" @click="showAnalythicDialog=true"></q-btn>
                         </q-card-section>
                     </template>
@@ -385,5 +393,8 @@ onMounted(async () => {
     .dark\:bg-dots-lighter {
         background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E");
     }
+}
+.q-field--labeled .q-field__native {
+    padding-bottom: 0;
 }
 </style>

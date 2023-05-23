@@ -20,7 +20,7 @@
                     />
                     <q-input name="user_phone" v-model="newReviewPhone" label="Телефон" type="tel" hint="Как Вам позвонить?"
                             lazy-rules :rules="[ val => val && val.length > 0 && val !== '+7 (___) ___ - ____' || 'Пожалуйста, заполните поле']"
-                            mask="+7 (###) ### - ####" fill-mask
+                            mask="+7 (###) ### - ####" fill-mask class="mt-4"
                     />
                     <q-input name="text" v-model="newReviewText" label="Комментарий" hint="Напишите плюсы и минусы, или опишите проблему"
                              type="textarea"
@@ -29,7 +29,7 @@
                     />
                     <LoadableSelect
                         hint="Выберите категорию проблемы"
-                        clearable outlined emit-value map-options
+                        clearable emit-value map-options
                         :url="route('api.thematics')"
                         v-model="newReviewTheme"
                         class="mt-4"

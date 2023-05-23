@@ -26,6 +26,7 @@ Route::get('categories', [ApiController::class, 'categories'])->name('api.catego
 Route::get('thematics', [ApiController::class, 'thematics'])->name('api.thematics');
 Route::get('with_reviews', [ApiController::class, 'withReviews'])->name('api.with_reviews');
 Route::get('type_reviews', [ApiController::class, 'typeReviews'])->name('api.type_reviews');
+Route::get('marketplaces', [ApiController::class, 'marketplaces'])->name('api.marketplaces');
 
 Route::get('postamats', [PostamatController::class, 'index'])->name('api.postamats'); //все постаматы
 Route::get('postamats_for_map', [PostamatController::class, 'forMap'])->name('map.postamats'); //ограниченные для карты

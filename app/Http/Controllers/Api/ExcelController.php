@@ -8,6 +8,7 @@ use App\Models\Marketplace;
 use App\Models\Postamat;
 use App\Models\Review;
 use App\Services\ReviewsService;
+use App\Services\AnalythisService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -100,11 +101,11 @@ class ExcelController extends Controller
     }
 
     public function dashboard_postamat(Postamat $postamat) {
-        $this->dashboard_xls($postamat);
+        return $this->dashboard_xls($postamat);
     }
 
     public function dashboard_marketplace(Marketplace $marketplace) {
-        $this->dashboard_xls(null, $marketplace);
+        return $this->dashboard_xls(null, $marketplace);
     }
 
     public function dashboard_xls(Postamat $postamat = null, Marketplace $marketplace = null) {
@@ -145,65 +146,12 @@ class ExcelController extends Controller
             ];
         }
 
-        $totalTable = [
-            [
-                'Характеристика',
-                'Всего',
-                'Курьеры',
-                'Расположение',
-                'Доставка'
-            ],
-            [
-                'Нейтральных',
-                $reviews->filter(function ($item) {
-                    return $item->neutral;
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->neutral && $item->category === 'Курьер';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->neutral && $item->category === 'Расположение';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->neutral && $item->category === 'Доставка';
-                })->count(),
-            ],
-            [
-                'Негативных',
-                $reviews->filter(function ($item) {
-                    return $item->negative;
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->negative && $item->category === 'Курьер';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->negative && $item->category === 'Расположение';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->negative && $item->category === 'Доставка';
-                })->count(),
-            ],
-            [
-                'Положительных',
-                $reviews->filter(function ($item) {
-                    return $item->positive;
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->positive && $item->category === 'Курьер';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->positive && $item->category === 'Расположение';
-                })->count(),
-                $reviews->filter(function ($item) {
-                    return $item->positive && $item->category === 'Доставка';
-                })->count(),
-            ]
-        ];
+        $totalTable = AnalythisService::calculateTotalTable($reviews);
         if ($postamat) {
-            $sheet->setCellValue('A1', $postamat?->name);
+            $sheet->setCellValue('A1', $postamat->name);
         }
         if ($marketplace) {
-            $sheet->setCellValue('A1', $marketplace?->name);
+            $sheet->setCellValue('A1', 'Маркетплейс:' . $marketplace->name);
         }
         $sheet->fromArray($table, null, $postamat || $marketplace ? 'A2' : 'A1');
 

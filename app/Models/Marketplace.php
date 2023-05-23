@@ -21,4 +21,11 @@ class Marketplace extends Model
     {
         return $this->hasMany(Review::class, 'marketplace_id')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
     }
+
+    public function toArray(){
+        $array = parent::toArray();
+        $array['label'] = $array['name'];
+        $array['value'] = $array['id'];
+        return $array;
+    }
 }

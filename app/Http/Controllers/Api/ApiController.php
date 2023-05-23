@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Thematic;
 use App\Models\Theme;
 use App\Models\Emotion;
+use App\Models\Marketplace;
 
 class ApiController extends BaseController
 {
@@ -27,5 +28,9 @@ class ApiController extends BaseController
 
     public function typeReviews() {
         return Emotion::all()->toArray();
+    }
+
+    public function marketplaces() {
+        return Marketplace::all()->toArray();
     }
 }
