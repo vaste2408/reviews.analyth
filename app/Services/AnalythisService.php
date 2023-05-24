@@ -41,7 +41,7 @@ class AnalythisService {
                     return $item->negative && $item->theme?->id === 4;
                 })->count(),
                 $reviews->filter(function ($item) {
-                    return $item->neutral && $item->thematic?->id === 11;
+                    return $item->negative && $item->thematic?->id === 11;
                 })->count(),
                 $reviews->filter(function ($item) {
                     return $item->negative && $item->theme?->id === 5;
@@ -56,10 +56,25 @@ class AnalythisService {
                     return $item->positive && $item->theme?->id === 4;
                 })->count(),
                 $reviews->filter(function ($item) {
-                    return $item->neutral && $item->thematic?->id === 11;
+                    return $item->positive && $item->thematic?->id === 11;
                 })->count(),
                 $reviews->filter(function ($item) {
                     return $item->positive && $item->theme?->id === 5;
+                })->count(),
+            ],
+            [
+                'Не идентифицировано',
+                $reviews->filter(function ($item) {
+                    return $item->undefined;
+                })->count(),
+                $reviews->filter(function ($item) {
+                    return $item->undefined && $item->theme?->id === 4;
+                })->count(),
+                $reviews->filter(function ($item) {
+                    return $item->undefined && $item->thematic?->id === 11;
+                })->count(),
+                $reviews->filter(function ($item) {
+                    return $item->undefined && $item->theme?->id === 5;
                 })->count(),
             ]
         ];

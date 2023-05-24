@@ -69,4 +69,9 @@ class Review extends Model
     {
         return $this->emotion_id === 1;
     }
+
+    public function getUndefinedAttribute()
+    {
+        return $this->emotion_id == null;
+    }
 }
