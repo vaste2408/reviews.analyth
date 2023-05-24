@@ -47,7 +47,7 @@ onMounted(async () => {
 
 <template>
     <Head title="Postamat Card" />
-    <NavBar :links="[{route: 'welcome', name: 'Main'}]" />
+    <NavBar :links="[{route: 'welcome', name: 'Главная'}]" />
     <div class="row q-pa-md justify-center bg-gray-100">
         <div class="col-8 row bg-white justify-between">
             <div class="col-8 q-ma-md q-pa-md">

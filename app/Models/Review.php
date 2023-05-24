@@ -23,7 +23,8 @@ class Review extends Model
         'confirmed',
         'thematic_id',
         'source_id',
-        'need_reaction'
+        'need_reaction',
+        'closed'
     ];
 
     public function postamat() : BelongsTo {

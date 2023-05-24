@@ -29,6 +29,7 @@ const data = reactive({
     reviews_search: '',
     reviews_columns: [
         {name: 'number', required: false, label: 'Номер', align: 'left', field: row => row.id, format: val => `${val}`, sortable: true},
+        {name: 'created', required: false, label: 'Создано', align: 'left', field: row => row.created_at, format: val => `${val}`, sortable: true},
         {name: 'source', required: false, label: 'Источник', align: 'left', field: row => row.source?.name, format: val => `${val}`, sortable: true},
         {name: 'category', required: false, label: 'Категория', align: 'left', field: row => row.theme?.name, format: val => `${val}`, sortable: true},
         {name: 'theme', required: false, label: 'Тематика', align: 'left', field: row => row.thematic?.name, format: val => `${val}`, sortable: true},
@@ -42,6 +43,7 @@ const data = reactive({
         {name: 'confirmed', required: true, label: 'Одобрено', align: 'left', field: row => row.confirmed, format: val => `${val}`},
         {name: 'reaction', required: true, label: 'Требует устранения', align: 'left', field: row => row.need_reaction, format: val => `${val}`},
         {name: 'closed', required: true, label: 'Устранено', align: 'left', field: row => row.closed, format: val => `${val}`},
+        {name: 'updated', required: false, label: 'Обновлено', align: 'left', field: row => row.updated_at, format: val => `${val}`, sortable: true},
         {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion?.name, format: val => `${val}`, sortable: true},
         {name: 'influ_cat', required: false, label: 'Влияние на категорию', align: 'left', field: row => row.influ_cat, format: val => `${val}`, sortable: true},
         {name: 'influ_post', required: false, label: 'Влияние на постамат', align: 'left', field: row => row.influ_post, format: val => `${val}`, sortable: true},
@@ -51,7 +53,7 @@ const data = reactive({
         sortBy: 'postamat',
         descending: false,
         page: 1,
-        rowsPerPage: 10,
+        rowsPerPage: 15,
     },
 
 });
@@ -112,7 +114,36 @@ function confirmReview(review) {
     .then(function (response) {
     })
     .catch(function (error) {
+        alert('Что-то пошло не так');
         review.confirmed = false;
+        console.log(error);
+    });
+}
+
+function makeProblem(review) {
+    review.need_reaction = true;
+    axios.post(route('api.reviews.update', review), {
+        need_reaction: review.need_reaction,
+    })
+    .then(function (response) {
+    })
+    .catch(function (error) {
+        alert('Что-то пошло не так');
+        review.need_reaction = false;
+        console.log(error);
+    });
+}
+
+function closeProblem(review) {
+    review.closed = true;
+    axios.post(route('api.reviews.update', review), {
+        closed: review.closed,
+    })
+    .then(function (response) {
+    })
+    .catch(function (error) {
+        alert('Что-то пошло не так');
+        review.closed = false;
         console.log(error);
     });
 }
@@ -232,6 +263,14 @@ const colors = ['red', '#ffc700', '#21BA45'];
                                         class="q-mr-sm"
                                         @click="analythReview(props.row)"
                                         title="Исследовать" />
+                                    <q-btn outline round color="red" size="sm" icon="report_problem"
+                                        class="q-mr-sm"
+                                        @click="makeProblem(props.row)"
+                                        title="Создать проблему" />
+                                    <q-btn outline round color="green" size="sm" icon="report_problem"
+                                        class="q-mr-sm"
+                                        @click="closeProblem(props.row)"
+                                        title="Проблема решена" />
                                 </template>
                                 <template v-else>
                                     {{column.field(props.row)}}

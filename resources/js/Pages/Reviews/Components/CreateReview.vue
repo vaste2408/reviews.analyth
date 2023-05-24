@@ -27,12 +27,12 @@
                              class="mt-4"
                              lazy-rules :rules="[ val => val && val.length > 0 || 'Пожалуйста, опишите достоинства/недостатки или опишите проблему']"
                     />
+                    <p class="mt-4 mb-0">Возникла проблема? Выберите тему, чтобы нашим специалистам было проще разобраться и исправить ситуацию.</p>
                     <LoadableSelect
                         hint="Выберите категорию проблемы"
                         clearable emit-value map-options
                         :url="route('api.thematics')"
                         v-model="newReviewTheme"
-                        class="mt-4"
                         label="Тема"></LoadableSelect>
                     <div class="mt-2">
                         <q-btn label="Сохранить" type="submit" color="primary"/>
