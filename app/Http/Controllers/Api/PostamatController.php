@@ -8,6 +8,19 @@ use App\Services\PostamatService;
 
 class PostamatController extends Controller
 {
+    /**
+     * @OA\Get(
+     *      path="/postamats",
+     *      operationId="postamats",
+     *      tags={"Постаматы"},
+     *      summary="Получить все Постаматы",
+     *      description="Получить все Постаматы",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
     public function index()
     {
         return PostamatService::Postamats();

@@ -100,14 +100,71 @@ class ExcelController extends Controller
         return $chart1;
     }
 
+    /**
+     * @OA\POST(
+     *      path="excel/postamats/{id}/dashboard",
+     *      operationId="dashboard_postamat",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитику Постамата в xls",
+     *      description="Выгрузить аналитику Постамата в xls",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="id постамата",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
     public function dashboard_postamat(Postamat $postamat) {
         return $this->dashboard_xls($postamat);
     }
 
+    /**
+     * @OA\POST(
+     *      path="excel/marketplaces/{id}/dashboard",
+     *      operationId="dashboard_marketplace",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитику Маркетплейса в xls",
+     *      description="Выгрузить аналитику Маркетплейса в xls",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="id постамата",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
     public function dashboard_marketplace(Marketplace $marketplace) {
         return $this->dashboard_xls(null, $marketplace);
     }
 
+    /**
+     * @OA\POST(
+     *      path="excel/dashboard",
+     *      operationId="dashboard_xls",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитическую панель в xls",
+     *      description="Выгрузить аналитическую панель в xls",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
     public function dashboard_xls(Postamat $postamat = null, Marketplace $marketplace = null) {
         $reviews = null;
         $reviews = $postamat ? ReviewsService::byPostamatFull($postamat) : null;

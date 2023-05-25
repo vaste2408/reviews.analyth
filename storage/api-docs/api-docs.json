@@ -1,0 +1,421 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Returns Services API",
+        "description": "Описание API для сервиса ЛЦТ 4 DeCODE-HS",
+        "contact": {
+            "url": "https://t.me/andrew_vaste"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://lct4.decodehs/api/",
+            "description": "Получить список API"
+        }
+    ],
+    "paths": {
+        "/": {},
+        "/categories": {
+            "get": {
+                "tags": [
+                    "Словари"
+                ],
+                "summary": "Получить словарь Категории отзывов",
+                "description": "Получить словарь Категории отзывов",
+                "operationId": "categories",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/thematics": {
+            "get": {
+                "tags": [
+                    "Словари"
+                ],
+                "summary": "Получить словарь Темы отзывов",
+                "description": "Получить словарь Темы отзывов",
+                "operationId": "thematics",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/emotions": {
+            "get": {
+                "tags": [
+                    "Словари"
+                ],
+                "summary": "Получить словарь Типы Эмоциональной окраски",
+                "description": "Получить словарь Типы Эмоциональной окраски",
+                "operationId": "emotions",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/marketplaces": {
+            "get": {
+                "tags": [
+                    "Маркетплейсы"
+                ],
+                "summary": "Получить все Маркетплейсы",
+                "description": "Получить все Маркетплейсы",
+                "operationId": "marketplaces",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "excel/postamats/{id}/dashboard": {
+            "post": {
+                "tags": [
+                    "Excel"
+                ],
+                "summary": "Выгрузить аналитику Постамата в xls",
+                "description": "Выгрузить аналитику Постамата в xls",
+                "operationId": "dashboard_postamat",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id постамата",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "excel/marketplaces/{id}/dashboard": {
+            "post": {
+                "tags": [
+                    "Excel"
+                ],
+                "summary": "Выгрузить аналитику Маркетплейса в xls",
+                "description": "Выгрузить аналитику Маркетплейса в xls",
+                "operationId": "dashboard_marketplace",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id постамата",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "excel/dashboard": {
+            "post": {
+                "tags": [
+                    "Excel"
+                ],
+                "summary": "Выгрузить аналитическую панель в xls",
+                "description": "Выгрузить аналитическую панель в xls",
+                "operationId": "dashboard_xls",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/postamats": {
+            "get": {
+                "tags": [
+                    "Постаматы"
+                ],
+                "summary": "Получить все Постаматы",
+                "description": "Получить все Постаматы",
+                "operationId": "postamats",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/reviews": {
+            "get": {
+                "tags": [
+                    "Отзывы"
+                ],
+                "summary": "Получить все Отзывы",
+                "description": "Получить все Отзывы",
+                "operationId": "reviews",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Отзывы"
+                ],
+                "summary": "Создать Отзыв",
+                "description": "Создать Отзыв",
+                "operationId": "storeReview",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "text",
+                                    "user_fio",
+                                    "user_phone",
+                                    "score"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "description": "Текст отзыва",
+                                        "type": "string"
+                                    },
+                                    "user_fio": {
+                                        "description": "ФИО автора",
+                                        "type": "string"
+                                    },
+                                    "user_phone": {
+                                        "description": "Телефон автора",
+                                        "type": "string"
+                                    },
+                                    "score": {
+                                        "description": "Оценка",
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "postamat_id": {
+                                        "description": "id Постамата",
+                                        "type": "integer"
+                                    },
+                                    "thematic_id": {
+                                        "description": "id Тематики",
+                                        "type": "integer"
+                                    },
+                                    "source_id": {
+                                        "description": "id Источника",
+                                        "type": "integer"
+                                    },
+                                    "marketplace_id": {
+                                        "description": "id Маркетплейса",
+                                        "type": "integer"
+                                    },
+                                    "emotion_id": {
+                                        "description": "id Эмоциональной окраски",
+                                        "type": "integer"
+                                    },
+                                    "confirmed": {
+                                        "description": "Отметка о проверке модерации",
+                                        "type": "boolean"
+                                    },
+                                    "need_reaction": {
+                                        "description": "Отметка о необходимости устранения",
+                                        "type": "boolean"
+                                    },
+                                    "closed": {
+                                        "description": "Отметка об устранении",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/postamats/{id}/reviews": {
+            "get": {
+                "tags": [
+                    "Постаматы"
+                ],
+                "summary": "Получить все отзывы Постамата",
+                "description": "Получить все отзывы Постамата",
+                "operationId": "postamatReviews",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id постамата",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/marketplaces/{id}/reviews": {
+            "get": {
+                "tags": [
+                    "Маркетплейсы"
+                ],
+                "summary": "Получить все отзывы Маркетплейса",
+                "description": "Получить все отзывы Маркетплейса",
+                "operationId": "marketplaceReviews",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id маркетплейса",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/reviews/{id}": {
+            "post": {
+                "tags": [
+                    "Отзывы"
+                ],
+                "summary": "Обновить Отзыв",
+                "description": "Обновить Отзыв",
+                "operationId": "updateReview",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id отзыва",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "score": {
+                                        "description": "Оценка",
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "postamat_id": {
+                                        "description": "id Постамата",
+                                        "type": "integer"
+                                    },
+                                    "thematic_id": {
+                                        "description": "id Тематики",
+                                        "type": "integer"
+                                    },
+                                    "source_id": {
+                                        "description": "id Источника",
+                                        "type": "integer"
+                                    },
+                                    "marketplace_id": {
+                                        "description": "id Маркетплейса",
+                                        "type": "integer"
+                                    },
+                                    "confirmed": {
+                                        "description": "Отметка о проверке модерации",
+                                        "type": "boolean"
+                                    },
+                                    "need_reaction": {
+                                        "description": "Отметка о необходимости устранения",
+                                        "type": "boolean"
+                                    },
+                                    "closed": {
+                                        "description": "Отметка об устранении",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/reviews/process": {
+            "post": {
+                "tags": [
+                    "Аналитика"
+                ],
+                "summary": "Проанализировать текстовое сообщение",
+                "description": "Проанализировать текстовое сообщение",
+                "operationId": "process",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/reviews/{id}/process": {
+            "post": {
+                "tags": [
+                    "Аналитика"
+                ],
+                "summary": "Проанализировать Отзыв",
+                "description": "Проанализировать Отзыв",
+                "operationId": "processReview",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id отзыва",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        }
+    }
+}

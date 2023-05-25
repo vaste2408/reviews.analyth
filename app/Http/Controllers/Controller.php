@@ -9,6 +9,25 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+/**
+ * @OA\OpenApi(
+ *  @OA\Info(
+ *      title="Returns Services API",
+ *      version="1.0.0",
+ *      description="Описание API для сервиса ЛЦТ 4 DeCODE-HS",
+ *      @OA\Contact(
+ *          url="https://t.me/andrew_vaste"
+ *      )
+ *  ),
+ *  @OA\Server(
+ *      description="Получить список API",
+ *      url="http://lct4.decodehs/api/"
+ *  ),
+ *  @OA\PathItem(
+ *      path="/"
+ *  )
+ * )
+ */
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;

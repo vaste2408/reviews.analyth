@@ -24,8 +24,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('categories', [ApiController::class, 'categories'])->name('api.categories');
 Route::get('thematics', [ApiController::class, 'thematics'])->name('api.thematics');
+Route::get('categories/{theme}/thematics', [ApiController::class, 'thematics'])->name('api.category.thematics');
 Route::get('with_reviews', [ApiController::class, 'withReviews'])->name('api.with_reviews');
-Route::get('type_reviews', [ApiController::class, 'typeReviews'])->name('api.type_reviews');
+Route::get('emotions', [ApiController::class, 'typeReviews'])->name('api.type_reviews');
 Route::get('marketplaces', [ApiController::class, 'marketplaces'])->name('api.marketplaces');
 
 Route::get('postamats', [PostamatController::class, 'index'])->name('api.postamats'); //все постаматы

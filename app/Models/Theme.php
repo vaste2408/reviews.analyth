@@ -16,6 +16,10 @@ class Theme extends Model
         'name',
     ];
 
+    public function thematics() {
+        return $this->hasMany(Thematic::class);
+    }
+
     public function toArray(){
         $array = parent::toArray();
         $array['label'] = $array['name'];

@@ -22,6 +22,7 @@ class Review extends Model
         'score',
         'confirmed',
         'thematic_id',
+        'emotion_id',
         'source_id',
         'need_reaction',
         'closed'

@@ -22,17 +22,18 @@ class StoreReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'postamat_id' => 'integer',
-            'thematic_id' => 'integer',
-            'source_id' => 'integer',
-            'marketplace_id' => 'integer',
-            'confirmed' => 'bool',
-            'need_reaction' => 'bool',
-            'closed' => 'bool', //устранено
+            'postamat_id' => 'sometimes | integer',
+            'thematic_id' => 'sometimes | integer',
+            'source_id' => 'sometimes | integer',
+            'marketplace_id' => 'sometimes | integer',
+            'emotion_id' => 'sometimes | integer',
+            'confirmed' => 'sometimes | bool',
+            'need_reaction' => 'sometimes | bool',
+            'closed' => 'sometimes | bool',
             'text' => 'required | string',
             'user_fio' => 'required | string',
             'user_phone' => 'required | string',
-            'score' => 'required',
+            'score' => 'required | numeric',
         ];
     }
 }
