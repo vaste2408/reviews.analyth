@@ -44,3 +44,5 @@ Route::post('reviews/import', [ReviewController::class, 'import'])->name('api.re
 Route::post('excel/dashboard', [ExcelController::class, 'dashboard_xls'])->name('api.excel.dashboard'); //экспортим аналитику в эксель
 Route::post('excel/postamats/{postamat}/dashboard', [ExcelController::class, 'dashboard_postamat'])->name('api.excel.dashboard.postamat'); //экспортим аналитику в эксель
 Route::post('excel/marketplaces/{marketplace}/dashboard', [ExcelController::class, 'dashboard_marketplace'])->name('api.excel.dashboard.marketplace'); //экспортим аналитику в эксель
+
+Route::post('/import',[ReviewController::class, 'import_xls'])->name('api.import');

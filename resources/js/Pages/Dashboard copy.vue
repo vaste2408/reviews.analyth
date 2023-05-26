@@ -18,6 +18,8 @@ const props = defineProps({
 });
 
 const reviews_table = ref(null);
+const showImportDialog = ref(false);
+const importResult = ref('');
 
 const data = reactive({
     postamats: [], //data from server
@@ -232,6 +234,32 @@ function wrapCsvValue (val, formatFn, row) {
   return `"${formatted}"`;
 }
 
+function openImportDialog() {
+    importResult.value = '';
+    showImportDialog.value = true;
+}
+
+function processUploadedResult(result) {
+    importResult.value = '';
+    let _result = JSON.parse(result.xhr.response);
+    if (_result.success) {
+        importResult.value = `Всего строк: ${_result.total}. Успешно загружено: ${_result.total - _result.failed}`;
+        loadReviews();
+    }
+    else {
+        failedUploading();
+        console.log(result);
+    }
+}
+
+function processUploading() {
+    importResult.value = 'Загрузка данных...';
+}
+
+function failedUploading() {
+    importResult.value = 'Ошибка формата данных';
+}
+
 onMounted(async () => {
     data.postamat = props.postamat;
     loadPostamats();
@@ -275,6 +303,28 @@ const colors = ['red', '#ffc700', '#21BA45'];
                             @update:model-value="loadReviews"
                     ></q-select>
                 </div>
+                <q-btn label="Импорт XLSX" class="ml-4" @click="openImportDialog"></q-btn>
+                <!--КАРТОЧКА ИМПОРТА-->
+                <q-dialog v-model="showImportDialog">
+                    <q-card>
+                        <q-card-section class="row items-center text-center bg-gray-100">
+                            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Импорт xlsx</h2>
+                            <q-space />
+                            <q-btn icon="close" flat round dense v-close-popup />
+                        </q-card-section>
+                        <q-card-section class="q-pt-none">
+                            <q-uploader
+                                url="/api/import"
+                                max-files="1"
+                                auto-upload
+                                @uploaded="processUploadedResult"
+                                @uploading="processUploading"
+                                @failed="failedUploading"
+                            />
+                            {{ importResult }}
+                        </q-card-section>
+                    </q-card>
+                </q-dialog>
             </div>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Модерация отзывов</h2>
 
@@ -343,6 +393,7 @@ const colors = ['red', '#ffc700', '#21BA45'];
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
                 <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
             </div>
+
         </div>
     </AuthenticatedLayout>
 </template>

@@ -341,14 +341,22 @@ class ReviewController extends Controller
         $list = json_decode($data, true);
         $collection = Review::hydrate($list);
         $collection = $collection->flatten();
-        $failed = [];
-        foreach ($collection as $review) {
-            try {
-                Review::create($review->toArray());
-            } catch (Throwable $err) {
-                $failed[] = $review;
+        $failed = ReviewsService::import($collection);
+        return response()->json(['success' => true, 'failed' => $failed], 201);
+    }
+
+    public function import_xls (Request $request) {
+        $files = $request->file();
+        if (sizeof($files)) {
+            foreach ($files as $file) { //файл всегда будет один
+                if ($file->extension() === "xlsx") {
+                    $filename = $file->getClientOriginalName();
+                    $file->storeAs('public/excel', $filename);
+                    $result = ReviewsService::process_file($filename);
+                    return response()->json(['success' => $result['success'], 'failed' => $result['failed'], 'total' => $result['total']], 201);
+                }
             }
         }
-        return response()->json(['success' => true, 'failed' => $failed], 201);
+        return response()->json(['success' => false, 'message' => 'Ошибка при загрузке файла'], 400);
     }
 }

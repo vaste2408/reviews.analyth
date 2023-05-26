@@ -25,7 +25,9 @@ class Review extends Model
         'emotion_id',
         'source_id',
         'need_reaction',
-        'closed'
+        'closed',
+        'created_at',
+        'order_price'
     ];
 
     public static function structure() {
