@@ -55,8 +55,8 @@ const data = reactive({
         {name: 'buttons', required: false, label: '', align: 'right', field: row => row.id, sortable: false},
     ],
     reviews_pagination: {
-        sortBy: 'postamat',
-        descending: false,
+        sortBy: 'number',
+        descending: true,
         page: 1,
         rowsPerPage: 15,
     },
@@ -101,7 +101,6 @@ function loadReviews() {
         : (data.marketplace ? route('api.marketplace.reviews', data.marketplace)
             : route('api.reviews'))).then(r => {
         r.json().then(answer => {
-            console.log(answer);
             data.reviews = answer;
             data.reviews_loading = false;
         });
