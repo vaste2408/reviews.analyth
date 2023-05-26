@@ -153,9 +153,9 @@ function closeProblem(review) {
 }
 
 function analythReview(review) {
-    axios.post(route('api.reviews.process', review), {})
+    axios.post(route('api.review.process', review), {})
     .then(function (response) {
-        //TODO бработка результата
+        loadReviews();
     })
     .catch(function (error) {
         alert('Что-то пошло не так');

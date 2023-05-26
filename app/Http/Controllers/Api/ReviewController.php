@@ -298,8 +298,29 @@ class ReviewController extends Controller
      */
     public function processReview(Review $review) {
         $result = AnalythisService::analyseText($review->text);
+        $review->analythis = json_encode($result);
+        if ($result['moderation'] && $result['moderation']['result'] == 0) { // 0 - успех
+            $value = $result['moderation']['data'][0]['Статус'];
+        }
+        if ($result['emotion'] && $result['emotion']['result'] == 0) {
+            $value = $result['moderation']['data'][0]['Статус'];
+            $review->emotion_id = $value;
+        }
+        if ($result['marketplace'] && $result['marketplace']['result'] == 0) {
+            $value = $result['moderation']['data'][0]['Код'];
+            if ($value != -1) {
+                $review->marketplace_id = $value;
+            }
+        }
+        if ($result['categories'] && $result['categories']['result'] == 0) {
+            $value = $result['moderation']['data'][0]['Код'];
+            if ($value != -1) {
+                $review->thematic_id = $value;
+            }
+        }
+        $review->save();
         //TODO обработка результата
-        return response()->json($result, 200);
+        return response()->json($review, 200);
     }
 
     /**

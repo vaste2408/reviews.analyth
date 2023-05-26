@@ -27,7 +27,9 @@ class Review extends Model
         'need_reaction',
         'closed',
         'created_at',
-        'order_price'
+        'order_price',
+        'analythis',
+        'marketplace_id'
     ];
 
     public static function structure() {
