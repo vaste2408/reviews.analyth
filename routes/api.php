@@ -39,6 +39,7 @@ Route::get('postamats/{postamat}/reviews', [ReviewController::class, 'postamatRe
 Route::get('marketplaces/{marketplace}/reviews', [ReviewController::class, 'marketplaceReviews'])->name('api.marketplace.reviews'); //отзывы постамата
 Route::post('reviews/process', [ReviewController::class, 'process'])->name('api.reviews.process');
 Route::post('reviews/{review}/process', [ReviewController::class, 'processReview'])->name('api.review.process');
+Route::post('reviews/import', [ReviewController::class, 'import'])->name('api.reviews.import');
 
 Route::post('excel/dashboard', [ExcelController::class, 'dashboard_xls'])->name('api.excel.dashboard'); //экспортим аналитику в эксель
 Route::post('excel/postamats/{postamat}/dashboard', [ExcelController::class, 'dashboard_postamat'])->name('api.excel.dashboard.postamat'); //экспортим аналитику в эксель

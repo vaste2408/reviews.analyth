@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Http\Requests\ProcessReviewRequest;
 use App\Models\Marketplace;
 use App\Models\Postamat;
 use App\Models\Review;
+use App\Services\SourcesService;
 use App\Services\ReviewsService;
 use App\Services\AnalythisService;
 
@@ -297,5 +300,55 @@ class ReviewController extends Controller
         $result = AnalythisService::analyseText($review->text);
         //TODO обработка результата
         return response()->json($result, 200);
+    }
+
+    /**
+     * @OA\POST(
+     *      path="/reviews/import",
+     *      operationId="importReview",
+     *      tags={"Отзывы"},
+     *      summary="Импорт Отзывов",
+     *      description="Импорт Отзывов",
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                  required={"source", "list"},
+     *                  @OA\Property(
+     *                     property="source",
+     *                     type="string",
+     *                     description="Название Источника данных",
+     *                 ),
+     *                  @OA\Property(
+     *                     property="list",
+     *                     type="string",
+     *                     description="json массив отзывов. Структуру см. Отзывы / Создать Отзыв",
+     *                 ),
+     *             )
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
+    public function import (Request $request) {
+        $_source = $request->input('source');
+        $source = SourcesService::findOrCreate($_source);
+        $data = $request->input('list');
+        $list = json_decode($data, true);
+        $collection = Review::hydrate($list);
+        $collection = $collection->flatten();
+        $failed = [];
+        foreach ($collection as $review) {
+            try {
+                Review::create($review->toArray());
+            } catch (Throwable $err) {
+                $failed[] = $review;
+            }
+        }
+        return response()->json(['success' => true, 'failed' => $failed], 201);
     }
 }

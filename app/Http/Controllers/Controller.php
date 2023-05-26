@@ -12,7 +12,7 @@ use Inertia\Inertia;
 /**
  * @OA\OpenApi(
  *  @OA\Info(
- *      title="Returns Services API",
+ *      title="Библиотека доступных API",
  *      version="1.0.0",
  *      description="Описание API для сервиса ЛЦТ 4 DeCODE-HS",
  *      @OA\Contact(

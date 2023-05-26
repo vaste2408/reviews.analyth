@@ -1,9 +1,10 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import NavBar from "@/Components/NavBar.vue";
 import PieChart from '@/Components/PieChart.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { exportFile, useQuasar } from 'quasar';
 
 const props = defineProps({
     postamat: {
@@ -15,6 +16,8 @@ const props = defineProps({
         default: null
     },
 });
+
+const reviews_table = ref(null);
 
 const data = reactive({
     postamats: [], //data from server
@@ -168,6 +171,7 @@ function exportXLS () {
         data: {
             postamat: data.postamat,
             marketplace: data.marketplace,
+            reviews: reviews_table.value.filteredSortedRows,
         },
         method: 'POST',
         responseType: 'blob',
@@ -183,6 +187,49 @@ function exportXLS () {
         alert('Что-то пошло не так');
         console.log(error);
     });
+}
+
+function exportTable () {
+    // naive encoding to csv format
+    const content = [data.reviews_columns.map(col => wrapCsvValue(col.label))].concat(
+        reviews_table.value.filteredSortedRows.map(row => data.reviews_columns.map(col => wrapCsvValue(
+        typeof col.field === 'function'
+            ? col.field(row)
+            : row[ col.field === void 0 ? col.name : col.field ],
+        col.format,
+        row
+        )).join(','))
+    ).join('\r\n')
+
+    const status = exportFile(
+        'table-export.csv',
+        "\ufeff"+content,
+        'text/csv'
+    )
+
+    if (status !== true) {
+        $q.notify({
+        message: 'Browser denied file download...',
+        color: 'negative',
+        icon: 'warning'
+        })
+    }
+}
+
+function wrapCsvValue (val, formatFn, row) {
+  let formatted = formatFn !== void 0
+    ? formatFn(val, row)
+    : val;
+
+  formatted = formatted === void 0 || formatted === null
+    ? ''
+    : String(formatted);
+
+  formatted = formatted.split('"').join('""')
+   .split('\n').join('\\n')
+   .split('\r').join('\\r');
+
+  return `"${formatted}"`;
 }
 
 onMounted(async () => {
@@ -230,9 +277,10 @@ const colors = ['red', '#ffc700', '#21BA45'];
                 </div>
             </div>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Модерация отзывов</h2>
-            <q-btn color="primary" label="Export xls" @click="exportXLS" />
+
             <div class="w-full mt-4">
                 <q-table
+                    ref="reviews_table"
                     flat bordered
                     title="Отзывы"
                     no-data-label="Нет отзывов"
@@ -250,6 +298,8 @@ const colors = ['red', '#ffc700', '#21BA45'];
                                 <q-icon name="search" />
                             </template>
                         </q-input>
+                        <q-btn class="ml-4" color="primary" label="Экспорт csv" @click="exportTable" icon-right="archive" no-caps />
+                        <q-btn class="ml-4" color="primary" label="Экспорт xls" @click="exportXLS" icon-right="archive" no-caps />
                     </template>
                     <template v-slot:body="props">
                         <q-tr :props="props">

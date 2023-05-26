@@ -70,20 +70,23 @@ function onResetReviewForm() {
     emit('close');
 }
 function onSubmitReviewForm() {
-    axios.post(route('api.reviews.create'), {
+    let _data = {
         postamat_id: props.postamat.id,
         text: newReviewText.value,
         user_fio: newReviewFio.value,
         user_phone: newReviewPhone.value,
         score: newReviewRating.value,
-        thematic_id: newReviewTheme.value
-    })
+    };
+    if (newReviewTheme.value)
+        _data.thematic_id = newReviewTheme.value;
+    axios.post(route('api.reviews.create'), _data)
     .then(function (response) {
         if (response.data.success) {
             emit('save');
         }
     })
     .catch(function (error) {
+        alert('Что-то пошло не так...');
         console.log(error);
     });
 }

@@ -100,79 +100,7 @@ class ExcelController extends Controller
         return $chart1;
     }
 
-    /**
-     * @OA\POST(
-     *      path="excel/postamats/{id}/dashboard",
-     *      operationId="dashboard_postamat",
-     *      tags={"Excel"},
-     *      summary="Выгрузить аналитику Постамата в xls",
-     *      description="Выгрузить аналитику Постамата в xls",
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="id постамата",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       ),
-     *     )
-     */
-    public function dashboard_postamat(Postamat $postamat) {
-        return $this->dashboard_xls($postamat);
-    }
-
-    /**
-     * @OA\POST(
-     *      path="excel/marketplaces/{id}/dashboard",
-     *      operationId="dashboard_marketplace",
-     *      tags={"Excel"},
-     *      summary="Выгрузить аналитику Маркетплейса в xls",
-     *      description="Выгрузить аналитику Маркетплейса в xls",
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="id постамата",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       ),
-     *     )
-     */
-    public function dashboard_marketplace(Marketplace $marketplace) {
-        return $this->dashboard_xls(null, $marketplace);
-    }
-
-    /**
-     * @OA\POST(
-     *      path="excel/dashboard",
-     *      operationId="dashboard_xls",
-     *      tags={"Excel"},
-     *      summary="Выгрузить аналитическую панель в xls",
-     *      description="Выгрузить аналитическую панель в xls",
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       ),
-     *     )
-     */
-    public function dashboard_xls(Postamat $postamat = null, Marketplace $marketplace = null) {
-        $reviews = null;
-        $reviews = $postamat ? ReviewsService::byPostamatFull($postamat) : null;
-        $reviews = $marketplace ? ReviewsService::byMarketplaceFull($marketplace) : null;
-        if (!$reviews) {
-            $reviews = ReviewsService::full();
-        }
-
+    private function formXLS ($reviews = [], $title = null) {
         //php artisan storage:link предварительно
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
@@ -204,13 +132,10 @@ class ExcelController extends Controller
         }
 
         $totalTable = AnalythisService::calculateTotalTable($reviews);
-        if ($postamat) {
-            $sheet->setCellValue('A1', $postamat->name);
+        if ($title) {
+            $sheet->setCellValue('A1', $title);
         }
-        if ($marketplace) {
-            $sheet->setCellValue('A1', 'Маркетплейс:' . $marketplace->name);
-        }
-        $sheet->fromArray($table, null, $postamat || $marketplace ? 'A2' : 'A1');
+        $sheet->fromArray($table, null, $title ? 'A2' : 'A1');
 
         $sheet2 = $this->createSheet($spreadsheet, 'Аналитика');
         $sheet2->fromArray($totalTable);
@@ -242,5 +167,93 @@ class ExcelController extends Controller
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
         return response()->download(public_path('/storage/excel/'.$file_name.'.xlsx'));
+    }
+
+    /**
+     * @OA\POST(
+     *      path="excel/postamats/{id}/dashboard",
+     *      operationId="dashboard_postamat",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитику Постамата в xls",
+     *      description="Выгрузить аналитику Постамата в xls",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="id постамата",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
+    public function dashboard_postamat(Postamat $postamat) {
+        $reviews = ReviewsService::byPostamatFull($postamat, 'Постамат: ' . $postamat->name);
+        return $this->formXLS($reviews);
+    }
+
+    /**
+     * @OA\POST(
+     *      path="excel/marketplaces/{id}/dashboard",
+     *      operationId="dashboard_marketplace",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитику Маркетплейса в xls",
+     *      description="Выгрузить аналитику Маркетплейса в xls",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="id постамата",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
+    public function dashboard_marketplace(Marketplace $marketplace) {
+        $reviews = ReviewsService::byMarketplaceFull($marketplace, 'Маркетплейс: ' . $marketplace->name);
+        return $this->formXLS($reviews);
+    }
+
+    /**
+     * @OA\POST(
+     *      path="excel/dashboard",
+     *      operationId="dashboard_xls",
+     *      tags={"Excel"},
+     *      summary="Выгрузить аналитическую панель в xls",
+     *      description="Выгрузить аналитическую панель в xls",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       ),
+     *     )
+     */
+    public function dashboard_xls(Request $request) {
+        $list = $request->input('reviews');
+        if (count($list)) {
+            //если отзывы прилетели в массиве - надо дистиллировать загруженные массивы и сделать их дозагрузку
+            $reviews = Review::hydrate($list);
+            foreach($reviews as $review) {
+                unset($review['theme']);
+                unset($review['thematic']);
+                unset($review['postamat']);
+                unset($review['source']);
+                unset($review['emotion']);
+                unset($review['marketplace']);
+            }
+            $reviews->load('postamat')->load('thematic')->load('theme')->load('source')->load('emotion')->load('marketplace');
+        }
+        else {
+            $reviews = ReviewsService::full();
+        }
+        return $this->formXLS($reviews);
     }
 }

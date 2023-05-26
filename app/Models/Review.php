@@ -28,6 +28,10 @@ class Review extends Model
         'closed'
     ];
 
+    public static function structure() {
+        return $this->fillable;
+    }
+
     public function postamat() : BelongsTo {
         return $this->belongsTo(Postamat::class);
     }

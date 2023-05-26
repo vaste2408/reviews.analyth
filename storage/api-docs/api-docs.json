@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Returns Services API",
+        "title": "Библиотека доступных API",
         "description": "Описание API для сервиса ЛЦТ 4 DeCODE-HS",
         "contact": {
             "url": "https://t.me/andrew_vaste"
@@ -412,6 +412,45 @@
                 ],
                 "responses": {
                     "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/reviews/import": {
+            "post": {
+                "tags": [
+                    "Отзывы"
+                ],
+                "summary": "Импорт Отзывов",
+                "description": "Импорт Отзывов",
+                "operationId": "importReview",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "source",
+                                    "list"
+                                ],
+                                "properties": {
+                                    "source": {
+                                        "description": "Название Источника данных",
+                                        "type": "string"
+                                    },
+                                    "list": {
+                                        "description": "json массив отзывов. Структуру см. Отзывы / Создать Отзыв",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
                         "description": "Successful operation"
                     }
                 }
