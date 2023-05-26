@@ -50,8 +50,6 @@ const data = reactive({
         {name: 'closed', required: true, label: 'Устранено', align: 'left', field: row => row.closed, format: val => `${val}`},
         {name: 'updated', required: false, label: 'Обновлено', align: 'left', field: row => row.updated_at, format: val => `${val}`, sortable: true},
         {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion?.name, format: val => `${val}`, sortable: true},
-        {name: 'influ_cat', required: false, label: 'Влияние на категорию', align: 'left', field: row => row.influ_cat, format: val => `${val}`, sortable: true},
-        {name: 'influ_post', required: false, label: 'Влияние на постамат', align: 'left', field: row => row.influ_post, format: val => `${val}`, sortable: true},
         {name: 'buttons', required: false, label: '', align: 'right', field: row => row.id, sortable: false},
     ],
     reviews_pagination: {

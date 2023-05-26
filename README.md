@@ -8,11 +8,12 @@
     npm install</li>
     <li>Создайте в корне файл .env (для референса есть .env.example)</li>
     <li>php artisan key:generate</li>
-    <li>Настройка .env<br/>
+    <li>Настройте .env :<br/>
         DB_CONNECTION=pgsql<br/>
         DB_HOST=ваш_хост<br/>
         DB_PORT=порт_хоста<br/>
         DB_DATABASE=название_бд<br/>
         DB_USERNAME=имя_юзера_бд<br/>
         DB_PASSWORD=пароль_юзера_бд</li>
+    <li>Измените адрес сервера аналитки в app/Services/AnalythisService</li>
 </ul>

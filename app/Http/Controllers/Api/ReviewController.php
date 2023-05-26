@@ -262,6 +262,19 @@ class ReviewController extends Controller
      *      tags={"Аналитика"},
      *      summary="Проанализировать текстовое сообщение",
      *      description="Проанализировать текстовое сообщение",
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                  @OA\Property(
+     *                     property="text",
+     *                     type="string",
+     *                     description="Текст для анализа",
+     *                 ),
+     *             )
+     *         )
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
@@ -307,19 +320,23 @@ class ReviewController extends Controller
             $review->emotion_id = $value;
         }
         if ($result['marketplace'] && $result['marketplace']['result'] == 0) {
-            $value = $result['moderation']['data'][0]['Код'];
-            if ($value != -1) {
-                $review->marketplace_id = $value;
+            if (isset($result['categories']['data'][0]['Код'])) {
+                $value = $result['marketplace']['data'][0]['Код'];
+                if ($value != -1) {
+                    $review->marketplace_id = $value;
+                }
             }
         }
         if ($result['categories'] && $result['categories']['result'] == 0) {
-            $value = $result['moderation']['data'][0]['Код'];
-            if ($value != -1) {
-                $review->thematic_id = $value;
+            $review->thematic_id = 1;
+            if (isset($result['categories']['data'][0]['Код'])) {
+                $value = $result['categories']['data'][0]['Код'];
+                if ($value != -1) {
+                    $review->thematic_id = $value;
+                }
             }
         }
         $review->save();
-        //TODO обработка результата
         return response()->json($review, 200);
     }
 
