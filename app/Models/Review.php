@@ -32,6 +32,11 @@ class Review extends Model
         'marketplace_id'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d h:i:s',
+        'updated_at' => 'datetime:Y-m-d h:i:s',
+     ];
+
     public static function structure() {
         return $this->fillable;
     }

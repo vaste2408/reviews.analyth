@@ -316,11 +316,14 @@ class ReviewController extends Controller
             $value = $result['moderation']['data'][0]['Статус'];
         }
         if ($result['emotion'] && $result['emotion']['result'] == 0) {
-            $value = $result['moderation']['data'][0]['Статус'];
+            $value = $result['emotion']['data'][0]['Статус'];
             $review->emotion_id = $value;
+            if ($value == -1) {
+                $review->need_reaction = true;
+            }
         }
         if ($result['marketplace'] && $result['marketplace']['result'] == 0) {
-            if (isset($result['categories']['data'][0]['Код'])) {
+            if (isset($result['marketplace']['data'][0]['Код'])) {
                 $value = $result['marketplace']['data'][0]['Код'];
                 if ($value != -1) {
                     $review->marketplace_id = $value;

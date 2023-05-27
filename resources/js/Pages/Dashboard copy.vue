@@ -48,7 +48,6 @@ const data = reactive({
         {name: 'confirmed', required: true, label: 'Одобрено', align: 'left', field: row => row.confirmed, format: val => `${val}`},
         {name: 'reaction', required: true, label: 'Требует устранения', align: 'left', field: row => row.need_reaction, format: val => `${val}`},
         {name: 'closed', required: true, label: 'Устранено', align: 'left', field: row => row.closed, format: val => `${val}`},
-        {name: 'updated', required: false, label: 'Обновлено', align: 'left', field: row => row.updated_at, format: val => `${val}`, sortable: true},
         {name: 'emotion', required: false, label: 'Характер', align: 'left', field: row => row.emotion?.name, format: val => `${val}`, sortable: true},
         {name: 'buttons', required: false, label: '', align: 'right', field: row => row.id, sortable: false},
     ],
@@ -257,6 +256,14 @@ function failedUploading() {
     importResult.value = 'Ошибка формата данных';
 }
 
+function rowBackground (row) {
+    if (row.emotion_id === -1 && ! row.closed)
+        return 'bg-red-4 text-white';
+    if (row.closed)
+        return 'bg-green-1';
+    return '';
+}
+
 onMounted(async () => {
     data.postamat = props.postamat;
     loadPostamats();
@@ -349,23 +356,26 @@ const colors = ['red', '#ffc700', '#21BA45'];
                         <q-btn class="ml-4" color="primary" label="Экспорт xls" @click="exportXLS" icon-right="archive" no-caps />
                     </template>
                     <template v-slot:body="props">
-                        <q-tr :props="props">
+                        <q-tr :props="props" :class="rowBackground(props.row)">
                             <q-td v-for="column in data.reviews_columns" :key="column.name" :props="props">
                                 <template v-if="column.name === 'buttons'">
                                     <q-btn outline round color="green" size="sm" icon="check"
-                                        class="q-mr-sm"
+                                    :disabled="props.row.confirmed"
+                                    class="q-mr-sm bg-white"
                                         @click="confirmReview(props.row)"
                                         title="Подтвердить" />
                                     <q-btn outline round color="primary" size="sm" icon="search"
-                                        class="q-mr-sm"
+                                        class="q-mr-sm bg-white"
                                         @click="analythReview(props.row)"
                                         title="Исследовать" />
                                     <q-btn outline round color="red" size="sm" icon="report_problem"
-                                        class="q-mr-sm"
+                                        :disabled="props.row.emotion_id==-1"
+                                        class="q-mr-sm bg-white"
                                         @click="makeProblem(props.row)"
                                         title="Создать проблему" />
                                     <q-btn outline round color="green" size="sm" icon="report_problem"
-                                        class="q-mr-sm"
+                                        :disabled="props.row.closed"
+                                        class="q-mr-sm bg-white"
                                         @click="closeProblem(props.row)"
                                         title="Проблема решена" />
                                 </template>
@@ -377,20 +387,21 @@ const colors = ['red', '#ffc700', '#21BA45'];
                     </template>
                 </q-table>
             </div>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Аналитика отзывов </h2>
-            <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
+            <div class="hidden">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight border-t pt-4 mt-4">Аналитика отзывов </h2>
+                <div class="w-full mt-4 flex justify-evenly border-b mb-4 pb-4">
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Общая оценка"/>
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Работа курьеров"/>
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Удобство расположения"/>
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Скорость доставки"/>
+                </div>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">О партнёрах</h2>
+                <div class="w-full mt-4 flex justify-evenly mb-4">
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
+                    <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
+                </div>
             </div>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">О партнёрах</h2>
-            <div class="w-full mt-4 flex justify-evenly mb-4">
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="OZON"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Яндекс.Маркет"/>
-                <PieChart :data="chart_data" :labels="labels" :colors="colors" title="Почта России"/>
-            </div>
-
         </div>
     </AuthenticatedLayout>
 </template>
